@@ -451,7 +451,7 @@
     buildDots('u-track4', U_POS4, 'l4', 'u4-');
     buildDots('u-track3', U_POS3, 'l3', 'u3-');
 
-    const u = { playing: false, bpm: 44, v4: 'low', v3: 'high', m4: false, m3: false };
+    const u = { playing: false, bpm: 44, v4: 'low', v3: 'cello', m4: false, m3: false };
     let u_s4 = 0, u_s3 = 0, u_startTime = 0, u_beatQueue = [], u_animFrame = null, u_d4 = null, u_d3 = null;
 
     buildLayerConfig('u-config4', 'l4', 'low',  k => { u.v4 = k; }, () => { u.m4 = !u.m4; return u.m4; });
