@@ -22,29 +22,39 @@
     return seed / 2147483647;
   }
 
-  function colorAt(x, y, w, h) {
-    const t = Math.max(0, Math.min(1, (y / h) + (x / w) * 0.12));
-    const stops = [
-      { p: 0,    r: 195, g: 85,  b: 38 },
-      { p: 0.18, r: 190, g: 110, b: 42 },
-      { p: 0.32, r: 168, g: 135, b: 45 },
-      { p: 0.46, r: 120, g: 148, b: 55 },
-      { p: 0.58, r: 70,  g: 142, b: 78 },
-      { p: 0.7,  r: 42,  g: 125, b: 100 },
-      { p: 0.82, r: 25,  g: 100, b: 105 },
-      { p: 1,    r: 12,  g: 68,  b: 85 }
-    ];
+  const stops = [
+    { p: 0,    r: 200, g: 80,  b: 32 },
+    { p: 0.14, r: 195, g: 105, b: 36 },
+    { p: 0.28, r: 178, g: 132, b: 40 },
+    { p: 0.42, r: 140, g: 142, b: 48 },
+    { p: 0.54, r: 95,  g: 135, b: 68 },
+    { p: 0.66, r: 50,  g: 120, b: 95 },
+    { p: 0.78, r: 30,  g: 98,  b: 105 },
+    { p: 0.9,  r: 18,  g: 78,  b: 95 },
+    { p: 1,    r: 12,  g: 62,  b: 80 }
+  ];
+
+  function sampleRGB(t) {
+    t = Math.max(0, Math.min(1, t));
     let i = 0;
     while (i < stops.length - 2 && stops[i + 1].p < t) i++;
     const a = stops[i], b = stops[i + 1];
-    const f = Math.max(0, Math.min(1, (t - a.p) / (b.p - a.p)));
-    return `rgb(${Math.round(a.r + (b.r - a.r) * f)},${Math.round(a.g + (b.g - a.g) * f)},${Math.round(a.b + (b.b - a.b) * f)})`;
+    const f = (t - a.p) / (b.p - a.p);
+    return [
+      a.r + (b.r - a.r) * f,
+      a.g + (b.g - a.g) * f,
+      a.b + (b.b - a.b) * f
+    ];
+  }
+
+  function rgb(r, g, b) {
+    return `rgb(${Math.round(Math.max(0, Math.min(255, r)))},${Math.round(Math.max(0, Math.min(255, g)))},${Math.round(Math.max(0, Math.min(255, b)))})`;
   }
 
   function draw() {
     const w = canvas.width = window.innerWidth;
     const h = canvas.height = window.innerHeight;
-    const S = 62;
+    const S = 58;
     const r = S / 2;
     const cols = Math.ceil(w / S) + 2;
     const rows = Math.ceil(h / S) + 2;
@@ -55,39 +65,29 @@
       for (let col = -1; col < cols; col++) {
         const x = col * S;
         const y = row * S;
-        const orient = rand() > 0.5;
+        const orient = rand() > 0.5 ? 1 : 0;
 
-        // Fill tile background
-        ctx.fillStyle = colorAt(x + S * 0.5, y + S * 0.5, w, h);
+        // Per-tile random shift creates stained-glass variation
+        const n = (rand() - 0.5) * 2; // -1 to 1
+
+        // Channel (tile background) — base gradient + cool shift
+        const ct = (y + S / 2) / h + (x + S / 2) / w * 0.1;
+        const cc = sampleRGB(ct);
+        ctx.fillStyle = rgb(cc[0] - n * 12, cc[1] - n * 4, cc[2] + n * 8);
         ctx.fillRect(x, y, S, S);
 
-        if (orient) {
-          // Lobes at top-left and bottom-right
-          ctx.fillStyle = colorAt(x + r * 0.3, y + r * 0.3, w, h);
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.arc(x, y, r, 0, PI / 2);
-          ctx.closePath();
-          ctx.fill();
+        // Lobes — sampled at lobe position + warm shift (opposite of channel)
+        const lobes = orient
+          ? [[x, y, 0, PI / 2], [x + S, y + S, PI, PI * 1.5]]
+          : [[x + S, y, PI / 2, PI], [x, y + S, PI * 1.5, PI * 2]];
 
-          ctx.fillStyle = colorAt(x + S - r * 0.3, y + S - r * 0.3, w, h);
+        for (const [cx, cy, sa, ea] of lobes) {
+          const lt = cy / h + cx / w * 0.1;
+          const lc = sampleRGB(lt);
+          ctx.fillStyle = rgb(lc[0] + n * 12, lc[1] + n * 4, lc[2] - n * 8);
           ctx.beginPath();
-          ctx.moveTo(x + S, y + S);
-          ctx.arc(x + S, y + S, r, PI, PI * 1.5);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          ctx.fillStyle = colorAt(x + S - r * 0.3, y + r * 0.3, w, h);
-          ctx.beginPath();
-          ctx.moveTo(x + S, y);
-          ctx.arc(x + S, y, r, PI / 2, PI);
-          ctx.closePath();
-          ctx.fill();
-
-          ctx.fillStyle = colorAt(x + r * 0.3, y + S - r * 0.3, w, h);
-          ctx.beginPath();
-          ctx.moveTo(x, y + S);
-          ctx.arc(x, y + S, r, PI * 1.5, PI * 2);
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, r, sa, ea);
           ctx.closePath();
           ctx.fill();
         }
@@ -96,31 +96,25 @@
 
     // Pass 2: draw outlines
     seed = 42;
-    ctx.lineWidth = 1.1;
+    ctx.lineWidth = 1.3;
     ctx.lineCap = 'round';
 
     for (let row = -1; row < rows; row++) {
       for (let col = -1; col < cols; col++) {
         const x = col * S;
         const y = row * S;
-        const orient = rand() > 0.5;
-        const t = (y / h + (x / w) * 0.12);
-        ctx.strokeStyle = `rgba(0,0,0,${0.18 + t * 0.14})`;
+        const orient = rand() > 0.5 ? 1 : 0;
+        rand(); // consume the noise rand to stay in sync
+
+        const t = (y + S / 2) / h;
+        ctx.strokeStyle = `rgba(0,0,0,${0.22 + t * 0.13})`;
 
         if (orient) {
-          ctx.beginPath();
-          ctx.arc(x, y, r, 0, PI / 2);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(x + S, y + S, r, PI, PI * 1.5);
-          ctx.stroke();
+          ctx.beginPath(); ctx.arc(x, y, r, 0, PI / 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(x + S, y + S, r, PI, PI * 1.5); ctx.stroke();
         } else {
-          ctx.beginPath();
-          ctx.arc(x + S, y, r, PI / 2, PI);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(x, y + S, r, PI * 1.5, PI * 2);
-          ctx.stroke();
+          ctx.beginPath(); ctx.arc(x + S, y, r, PI / 2, PI); ctx.stroke();
+          ctx.beginPath(); ctx.arc(x, y + S, r, PI * 1.5, PI * 2); ctx.stroke();
         }
       }
     }
