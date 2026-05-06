@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>background</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  let seed = 42;
+  function rand() {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  }
+
+  function draw() {
+    const w = canvas.width = window.innerWidth;
+    const h = canvas.height = window.innerHeight;
+
+    // Gradient: warm orange-red → gold → olive → teal → dark blue-teal
+    const grad = ctx.createLinearGradient(0, 0, w * 0.15, h);
+    grad.addColorStop(0, '#c85a28');
+    grad.addColorStop(0.15, '#c4703a');
+    grad.addColorStop(0.3, '#a88a3a');
+    grad.addColorStop(0.45, '#7a9a42');
+    grad.addColorStop(0.6, '#4a8a5a');
+    grad.addColorStop(0.75, '#2a7a6a');
+    grad.addColorStop(0.9, '#146068');
+    grad.addColorStop(1, '#0c4858');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Truchet tile curves
+    const size = 55;
+    const cols = Math.ceil(w / size) + 1;
+    const rows = Math.ceil(h / size) + 1;
+    const r = size / 2;
+
+    ctx.lineWidth = 1.2;
+    ctx.lineCap = 'round';
+
+    seed = 42;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * size;
+        const y = row * size;
+
+        // Slightly vary line darkness based on position
+        const t = y / h;
+        const alpha = 0.22 + t * 0.12;
+        ctx.strokeStyle = 'rgba(0,0,0,' + alpha + ')';
+
+        if (rand() > 0.5) {
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI / 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(x + size, y + size, r, Math.PI, Math.PI * 1.5);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(x + size, y, r, Math.PI / 2, Math.PI);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(x, y + size, r, Math.PI * 1.5, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  window.addEventListener('resize', draw);
+  draw();
+</script>
+</body>
+</html>
