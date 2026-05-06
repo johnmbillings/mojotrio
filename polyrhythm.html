@@ -335,7 +335,7 @@
       const container = document.getElementById(containerId);
       const label = document.createElement('span');
       label.className = 'layer-config-label ' + labelClass;
-      label.textContent = labelClass === 'l4' ? '4' : '3';
+      label.textContent = labelClass === 'l12' ? '12' : labelClass === 'l4' ? '4' : '3';
       container.appendChild(label);
       const keys = Object.keys(voices).concat(extraVoices || []);
       const btns = {};
@@ -382,7 +382,7 @@
     buildDots('m-track3', M_POS3, 'l3', 'm3-');
     buildDots('m-track12', M_POS12, 'l12', 'm12-');
 
-    const m = { playing: false, bpm: 80, v4: 'low', v3: 'high', v12: 'snap', m4: false, m3: false, m12: true };
+    const m = { playing: false, bpm: 80, v4: 'low', v3: 'high', v12: 'snap', m4: false, m3: false, m12: false };
     let m_s4 = 0, m_s3 = 0, m_s12 = 0, m_startTime = 0, m_beatQueue = [], m_animFrame = null, m_d4 = null, m_d3 = null, m_d12 = null;
 
     buildLayerConfig('m-config4', 'l4', 'low',  k => { m.v4 = k; }, () => { m.m4 = !m.m4; return m.m4; });
