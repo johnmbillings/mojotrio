@@ -64,6 +64,8 @@
     .dot.l4.active { background: #8cb4d8; border-color: #8cb4d8; }
     .dot.l3 { border-color: #d8a08c; }
     .dot.l3.active { background: #d8a08c; border-color: #d8a08c; }
+    .dot.l12 { border-color: #888; width: 1.2rem; height: 1.2rem; }
+    .dot.l12.active { background: #aaa; border-color: #aaa; }
     .controls { margin-top: 1.5rem; }
     .layer-config {
       display: flex;
@@ -81,6 +83,7 @@
     }
     .layer-config-label.l4 { color: #8cb4d8; }
     .layer-config-label.l3 { color: #d8a08c; }
+    .layer-config-label.l12 { color: #888; }
     .sound-btn {
       font-size: 0.85rem;
       padding: 0.3em 0.7em;
@@ -126,10 +129,12 @@
 
   <div class="beat-track" id="m-track4"></div>
   <div class="beat-track" id="m-track3"></div>
+  <div class="beat-track" id="m-track12"></div>
 
   <div class="controls">
     <div class="layer-config" id="m-config4"></div>
     <div class="layer-config" id="m-config3"></div>
+    <div class="layer-config" id="m-config12"></div>
     <div style="margin-top:1rem; text-align:center;">
       <div class="tempo-display"><span id="m-bpm-display">80</span> bpm</div>
       <input id="m-bpm" type="range" min="40" max="200" step="1" value="80">
@@ -315,7 +320,7 @@
       const track = document.getElementById(trackId);
       const label = document.createElement('span');
       label.className = 'beat-track-label ' + layerClass;
-      label.textContent = layerClass === 'l4' ? '4/4' : 'pat.';
+      label.textContent = layerClass === 'l4' ? '4/4' : layerClass === 'l12' ? '12' : 'pat.';
       track.appendChild(label);
       positions.forEach((pos, i) => {
         const dot = document.createElement('div');
@@ -371,15 +376,18 @@
     // === Mahler 3-against-4 ===
     const M_POS4 = [0, 0.25, 0.5, 0.75];
     const M_POS3 = [0, 1/3, 2/3];
+    const M_POS12 = Array.from({length: 12}, (_, i) => i / 12);
 
     buildDots('m-track4', M_POS4, 'l4', 'm4-');
     buildDots('m-track3', M_POS3, 'l3', 'm3-');
+    buildDots('m-track12', M_POS12, 'l12', 'm12-');
 
-    const m = { playing: false, bpm: 80, v4: 'low', v3: 'high', m4: false, m3: false };
-    let m_s4 = 0, m_s3 = 0, m_startTime = 0, m_beatQueue = [], m_animFrame = null, m_d4 = null, m_d3 = null;
+    const m = { playing: false, bpm: 80, v4: 'low', v3: 'high', v12: 'snap', m4: false, m3: false, m12: true };
+    let m_s4 = 0, m_s3 = 0, m_s12 = 0, m_startTime = 0, m_beatQueue = [], m_animFrame = null, m_d4 = null, m_d3 = null, m_d12 = null;
 
     buildLayerConfig('m-config4', 'l4', 'low',  k => { m.v4 = k; }, () => { m.m4 = !m.m4; return m.m4; });
     buildLayerConfig('m-config3', 'l3', 'high', k => { m.v3 = k; }, () => { m.m3 = !m.m3; return m.m3; });
+    buildLayerConfig('m-config12', 'l12', 'snap', k => { m.v12 = k; }, () => { m.m12 = !m.m12; return m.m12; });
 
     function m_scheduler() {
       const L = (60 / m.bpm) * 4;
@@ -399,19 +407,30 @@
         m_beatQueue.push({ time: t, layer: 3, index: idx });
         m_s3++;
       }
+      while (true) {
+        const mi = Math.floor(m_s12 / 12), idx = m_s12 % 12;
+        const t = m_startTime + mi * L + M_POS12[idx] * L;
+        if (t >= audioCtx.currentTime + SCHEDULE_AHEAD) break;
+        if (!m.m12) playBuffer(m.v12, t, previewNode);
+        m_beatQueue.push({ time: t, layer: 12, index: idx });
+        m_s12++;
+      }
     }
 
     function m_visuals() {
       if (!m.playing) return;
       const now = audioCtx.currentTime;
       const L = (60 / m.bpm) * 4;
-      let a4 = -1, a3 = -1;
+      let a4 = -1, a3 = -1, a12 = -1;
       while (m_beatQueue.length && m_beatQueue[0].time <= now) {
         const b = m_beatQueue.shift();
-        if (b.layer === 4) a4 = b.index; else a3 = b.index;
+        if (b.layer === 4) a4 = b.index;
+        else if (b.layer === 3) a3 = b.index;
+        else a12 = b.index;
       }
       if (a4 >= 0) { highlightDot('m4-', a4, 4); clearTimeout(m_d4); m_d4 = setTimeout(() => highlightDot('m4-', -1, 4), (L/4)*400); }
       if (a3 >= 0) { highlightDot('m3-', a3, 3); clearTimeout(m_d3); m_d3 = setTimeout(() => highlightDot('m3-', -1, 3), (L/3)*400); }
+      if (a12 >= 0) { highlightDot('m12-', a12, 12); clearTimeout(m_d12); m_d12 = setTimeout(() => highlightDot('m12-', -1, 12), (L/12)*400); }
       m_animFrame = requestAnimationFrame(m_visuals);
     }
 
@@ -419,7 +438,7 @@
       if (u.playing) u_stop();
       if (!audioCtx) initAudio();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      m_s4 = 0; m_s3 = 0; m_beatQueue = [];
+      m_s4 = 0; m_s3 = 0; m_s12 = 0; m_beatQueue = [];
       m_startTime = audioCtx.currentTime + 0.05;
       ensureWorker(); worker.postMessage('start');
       m.playing = true;
@@ -431,17 +450,17 @@
       m.playing = false;
       if (!u.playing && worker) worker.postMessage('stop');
       cancelAnimationFrame(m_animFrame);
-      clearTimeout(m_d4); clearTimeout(m_d3);
+      clearTimeout(m_d4); clearTimeout(m_d3); clearTimeout(m_d12);
       cancelScheduled(); m_beatQueue = [];
       document.getElementById('m-start-btn').textContent = 'start';
-      highlightDot('m4-', -1, 4); highlightDot('m3-', -1, 3);
+      highlightDot('m4-', -1, 4); highlightDot('m3-', -1, 3); highlightDot('m12-', -1, 12);
     }
 
     document.getElementById('m-start-btn').addEventListener('click', () => { if (!m.playing) m_start(); else m_stop(); });
     document.getElementById('m-bpm').addEventListener('input', () => { document.getElementById('m-bpm-display').textContent = parseInt(document.getElementById('m-bpm').value, 10); });
     document.getElementById('m-bpm').addEventListener('change', () => {
       m.bpm = parseInt(document.getElementById('m-bpm').value, 10);
-      if (m.playing) { cancelScheduled(); m_beatQueue = []; m_s4 = 0; m_s3 = 0; m_startTime = audioCtx.currentTime + 0.05; }
+      if (m.playing) { cancelScheduled(); m_beatQueue = []; m_s4 = 0; m_s3 = 0; m_s12 = 0; m_startTime = audioCtx.currentTime + 0.05; }
     });
 
     // === Umoja m. 23 ===
