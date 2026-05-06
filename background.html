@@ -23,15 +23,16 @@
   }
 
   const stops = [
-    { p: 0,    r: 200, g: 80,  b: 32 },
-    { p: 0.14, r: 195, g: 105, b: 36 },
-    { p: 0.28, r: 178, g: 132, b: 40 },
-    { p: 0.42, r: 140, g: 142, b: 48 },
-    { p: 0.54, r: 95,  g: 135, b: 68 },
-    { p: 0.66, r: 50,  g: 120, b: 95 },
-    { p: 0.78, r: 30,  g: 98,  b: 105 },
-    { p: 0.9,  r: 18,  g: 78,  b: 95 },
-    { p: 1,    r: 12,  g: 62,  b: 80 }
+    { p: 0,    r: 198, g: 75,  b: 30 },
+    { p: 0.12, r: 190, g: 85,  b: 32 },
+    { p: 0.24, r: 168, g: 105, b: 38 },
+    { p: 0.36, r: 130, g: 115, b: 44 },
+    { p: 0.48, r: 85,  g: 118, b: 56 },
+    { p: 0.58, r: 48,  g: 110, b: 78 },
+    { p: 0.68, r: 30,  g: 95,  b: 96 },
+    { p: 0.80, r: 18,  g: 78,  b: 92 },
+    { p: 0.92, r: 12,  g: 62,  b: 82 },
+    { p: 1,    r: 8,   g: 50,  b: 72 }
   ];
 
   function sampleRGB(t) {
@@ -73,7 +74,7 @@
         // Channel (tile background) — base gradient + cool shift
         const ct = (y + S / 2) / h + (x + S / 2) / w * 0.1;
         const cc = sampleRGB(ct);
-        ctx.fillStyle = rgb(cc[0] - n * 12, cc[1] - n * 4, cc[2] + n * 8);
+        ctx.fillStyle = rgb(cc[0] - n * 15, cc[1] - n * 5, cc[2] + n * 10);
         ctx.fillRect(x, y, S, S);
 
         // Lobes — sampled at lobe position + warm shift (opposite of channel)
@@ -84,7 +85,7 @@
         for (const [cx, cy, sa, ea] of lobes) {
           const lt = cy / h + cx / w * 0.1;
           const lc = sampleRGB(lt);
-          ctx.fillStyle = rgb(lc[0] + n * 12, lc[1] + n * 4, lc[2] - n * 8);
+          ctx.fillStyle = rgb(lc[0] + n * 15, lc[1] + n * 5, lc[2] - n * 10);
           ctx.beginPath();
           ctx.moveTo(cx, cy);
           ctx.arc(cx, cy, r, sa, ea);
