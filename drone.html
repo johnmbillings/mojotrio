@@ -257,9 +257,7 @@
       droneFilter.frequency.value = Math.min(freq * 8, 4000);
       droneFilter.Q.value = 0.7;
 
-      const now = audioCtx.currentTime;
-      droneGain.gain.setValueAtTime(0.001, now);
-      droneGain.gain.setTargetAtTime(0.45, now, 0.08);
+      droneGain.gain.value = 0.45;
 
       droneOsc1.connect(droneFilter);
       droneOsc2.connect(droneFilter);
@@ -277,15 +275,8 @@
 
     function stopDrone() {
       if (!droneGain) return;
-      const now = audioCtx.currentTime;
-      droneGain.gain.cancelScheduledValues(now);
-      droneGain.gain.setValueAtTime(droneGain.gain.value, now);
-      droneGain.gain.setTargetAtTime(0.001, now, 0.08);
-
       const oscs = [droneOsc1, droneOsc2, droneLfo];
-      setTimeout(() => {
-        oscs.forEach(o => { try { o.stop(); } catch (e) {} });
-      }, 500);
+      oscs.forEach(o => { try { o.stop(); } catch (e) {} });
 
       droneOsc1 = null; droneOsc2 = null; droneLfo = null;
       droneFilter = null; droneGain = null; lfoGainNode = null;
