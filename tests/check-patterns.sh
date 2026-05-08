@@ -35,6 +35,13 @@ if [ -n "$FETCH_NO_OK" ]; then
   ERRORS=$((ERRORS + 1))
 fi
 
+# Check: linearRampToValueAtTime (broken in macOS Safari)
+LINEAR_RAMP=$(grep -rn 'linearRampToValueAtTime' *.html 2>/dev/null)
+if [ -n "$LINEAR_RAMP" ]; then
+  echo "WARNING: linearRampToValueAtTime found (broken in macOS Safari, use setTargetAtTime):"
+  echo "$LINEAR_RAMP"
+fi
+
 if [ $ERRORS -gt 0 ]; then
   echo ""
   echo "$ERRORS pattern check(s) failed."

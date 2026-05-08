@@ -273,10 +273,9 @@
       filter.frequency.value = 2200;
       filter.Q.value = 0.7;
 
-      env.gain.setValueAtTime(0, startTime);
-      env.gain.linearRampToValueAtTime(0.7, startTime + attack);
-      env.gain.setValueAtTime(0.7, startTime + dur - release);
-      env.gain.linearRampToValueAtTime(0, startTime + dur);
+      env.gain.setValueAtTime(0.001, startTime);
+      env.gain.setTargetAtTime(0.7, startTime, attack * 0.3);
+      env.gain.setTargetAtTime(0.001, startTime + dur - release, release * 0.3);
 
       osc1.connect(filter);
       osc2.connect(filter);

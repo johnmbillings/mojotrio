@@ -258,8 +258,8 @@
       droneFilter.Q.value = 0.7;
 
       const now = audioCtx.currentTime;
-      droneGain.gain.setValueAtTime(0, now);
-      droneGain.gain.linearRampToValueAtTime(0.45, now + 0.4);
+      droneGain.gain.setValueAtTime(0.001, now);
+      droneGain.gain.setTargetAtTime(0.45, now, 0.08);
 
       droneOsc1.connect(droneFilter);
       droneOsc2.connect(droneFilter);
@@ -280,7 +280,7 @@
       const now = audioCtx.currentTime;
       droneGain.gain.cancelScheduledValues(now);
       droneGain.gain.setValueAtTime(droneGain.gain.value, now);
-      droneGain.gain.linearRampToValueAtTime(0, now + 0.4);
+      droneGain.gain.setTargetAtTime(0.001, now, 0.08);
 
       const oscs = [droneOsc1, droneOsc2, droneLfo];
       setTimeout(() => {
@@ -299,10 +299,10 @@
       if (!droneOsc1) return;
       const freq = currentFreq();
       const now = audioCtx.currentTime;
-      droneOsc1.frequency.linearRampToValueAtTime(freq, now + 0.08);
-      droneOsc2.frequency.linearRampToValueAtTime(freq * 1.003, now + 0.08);
-      lfoGainNode.gain.linearRampToValueAtTime(freq * 0.005, now + 0.08);
-      droneFilter.frequency.linearRampToValueAtTime(Math.min(freq * 8, 4000), now + 0.08);
+      droneOsc1.frequency.setTargetAtTime(freq, now, 0.03);
+      droneOsc2.frequency.setTargetAtTime(freq * 1.003, now, 0.03);
+      lfoGainNode.gain.setTargetAtTime(freq * 0.005, now, 0.03);
+      droneFilter.frequency.setTargetAtTime(Math.min(freq * 8, 4000), now, 0.03);
     }
 
     playBtn.addEventListener('click', () => {
