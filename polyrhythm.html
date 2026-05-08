@@ -204,7 +204,7 @@
     }
 
     function initAudio() {
-      audioCtx = new AudioContext();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       layer4Node = audioCtx.createGain();
       layer4Node.gain.value = 0.5;
       layer4Node.connect(audioCtx.destination);
@@ -343,12 +343,12 @@
         const btn = document.createElement('button');
         btn.className = 'sound-btn' + (key === defaultKey ? ' active' : '');
         btn.textContent = key === 'cello' ? 'cello' : voices[key].name;
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           Object.values(btns).forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           onSelect(key);
           if (!audioCtx) initAudio();
-          if (audioCtx.state === 'suspended') audioCtx.resume();
+          if (audioCtx.state === 'suspended') await audioCtx.resume();
           if (key === 'cello') playCello(0, audioCtx.currentTime, 4.0, previewNode);
           else playBuffer(key, audioCtx.currentTime, previewNode);
         });
@@ -434,10 +434,10 @@
       m_animFrame = requestAnimationFrame(m_visuals);
     }
 
-    function m_start() {
+    async function m_start() {
       if (u.playing) u_stop();
       if (!audioCtx) initAudio();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
       m_s4 = 0; m_s3 = 0; m_s12 = 0; m_beatQueue = [];
       m_startTime = audioCtx.currentTime + 0.05;
       ensureWorker(); worker.postMessage('start');
@@ -513,10 +513,10 @@
       u_animFrame = requestAnimationFrame(u_visuals);
     }
 
-    function u_start() {
+    async function u_start() {
       if (m.playing) m_stop();
       if (!audioCtx) initAudio();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
       u_s4 = 0; u_s3 = 0; u_beatQueue = [];
       u_startTime = audioCtx.currentTime + 0.05;
       ensureWorker(); worker.postMessage('start');

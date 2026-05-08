@@ -221,7 +221,7 @@
     }
 
     function initAudio() {
-      audioCtx = new AudioContext();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       audioCtx.onstatechange = () => {
         if ((audioCtx.state === 'interrupted' || audioCtx.state === 'suspended') && isPlaying) {
           stopDrone();
@@ -229,9 +229,9 @@
       };
     }
 
-    function startDrone() {
+    async function startDrone() {
       if (!audioCtx) initAudio();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
 
       const freq = currentFreq();
 
