@@ -127,10 +127,10 @@ test('drone stop resets state', async ({ page }) => {
 });
 
 // === Polyrhythm page ===
-test('polyrhythm page renders both exercises', async ({ page }) => {
+test('polyrhythm page renders all exercises', async ({ page }) => {
   await page.goto(BASE + '/polyrhythm.html');
   const tracks = await page.$$('.beat-track');
-  expect(tracks.length).toBe(5); // mahler: 3 tracks, umoja: 2 tracks
+  expect(tracks.length).toBe(6); // mahler: 3, umoja: 2, wave: 1
 });
 
 test('polyrhythm mahler start creates AudioContext', async ({ page }) => {

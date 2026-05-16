@@ -165,6 +165,24 @@
     </div>
   </div>
 
+  <hr class="separator">
+
+  <!-- === Wave melody syncopation === -->
+  <p class="ex-title">wave melody</p>
+  <p class="ex-subtitle">"here comes a wave" — syncopation against 4/4</p>
+
+  <div class="beat-track" id="w-track4"></div>
+
+  <div class="controls">
+    <div style="margin-top:1rem; text-align:center;">
+      <div class="tempo-display"><span id="w-bpm-display">72</span> bpm</div>
+      <input id="w-bpm" type="range" min="40" max="140" step="1" value="72">
+    </div>
+    <div style="text-align:center; margin-top:1rem;">
+      <button id="w-start-btn">start</button>
+    </div>
+  </div>
+
   <script>
     // === Shared audio infrastructure ===
     const voices = {
@@ -540,6 +558,152 @@
       u.bpm = parseInt(document.getElementById('u-bpm').value, 10);
       if (u.playing) { cancelScheduled(); u_beatQueue = []; u_s4 = 0; u_s3 = 0; u_startTime = audioCtx.currentTime + 0.05; }
     });
+
+    // === Wave melody syncopation ===
+    // 3-measure cycle, 24 eighth-note positions
+    // "Here comes a wave meant to wash me away, a tide that is taking me un-"
+    const W_POS4 = [0, 2/24, 4/24, 6/24, 8/24, 10/24, 12/24, 14/24, 16/24, 18/24, 20/24, 22/24];
+    const W_MELODY = [
+      { pos: 0/24,  freq: 174.61, dur: 1 },
+      { pos: 1/24,  freq: 207.65, dur: 1 },
+      { pos: 2/24,  freq: 261.63, dur: 1 },
+      { pos: 3/24,  freq: 277.18, dur: 2 },
+      { pos: 5/24,  freq: 261.63, dur: 1 },
+      { pos: 6/24,  freq: 207.65, dur: 1 },
+      { pos: 7/24,  freq: 196.00, dur: 2 },
+      { pos: 9/24,  freq: 207.65, dur: 1 },
+      { pos: 10/24, freq: 233.08, dur: 1 },
+      { pos: 11/24, freq: 207.65, dur: 2 },
+      { pos: 14/24, freq: 196.00, dur: 1 },
+      { pos: 16/24, freq: 174.61, dur: 2 },
+      { pos: 18/24, freq: 196.00, dur: 1 },
+      { pos: 19/24, freq: 207.65, dur: 1 },
+      { pos: 20/24, freq: 196.00, dur: 1 },
+      { pos: 21/24, freq: 207.65, dur: 1 },
+      { pos: 22/24, freq: 233.08, dur: 1 },
+      { pos: 23/24, freq: 233.08, dur: 1 }
+    ];
+
+    buildDots('w-track4', W_POS4, 'l4', 'w4-');
+
+    const w = { playing: false, bpm: 72, m4: false };
+    let w_s4 = 0, w_sMel = 0, w_startTime = 0, w_beatQueue = [], w_animFrame = null, w_d4 = null;
+
+    function playMelodyNote(freq, startTime, dur, dest) {
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      const env = audioCtx.createGain();
+      osc1.type = 'sawtooth';
+      osc1.frequency.value = freq;
+      osc2.type = 'sawtooth';
+      osc2.frequency.value = freq * 1.003;
+      filter.type = 'lowpass';
+      filter.frequency.value = 2200;
+      filter.Q.value = 0.7;
+      env.gain.value = 0.35;
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(env);
+      env.connect(dest);
+      const nodes = [osc1, osc2];
+      nodes.forEach(n => {
+        n.start(startTime);
+        n.stop(startTime + dur);
+        scheduledSources.push(n);
+        n.onended = () => {
+          const i = scheduledSources.indexOf(n);
+          if (i >= 0) scheduledSources.splice(i, 1);
+        };
+      });
+    }
+
+    function w_scheduler() {
+      const L = (60 / w.bpm) * 4;
+      const cycleLen = L * 3;
+      const eighthDur = cycleLen / 24;
+
+      // Pulse (12 beats per 3-measure cycle)
+      while (true) {
+        const ci = Math.floor(w_s4 / 12);
+        const idx = w_s4 % 12;
+        const t = w_startTime + ci * cycleLen + W_POS4[idx] * cycleLen;
+        if (t >= audioCtx.currentTime + SCHEDULE_AHEAD) break;
+        if (!w.m4) playBuffer('click', t, layer4Node);
+        w_beatQueue.push({ time: t, layer: 4, index: idx });
+        w_s4++;
+      }
+
+      // Melody
+      while (true) {
+        const ci = Math.floor(w_sMel / W_MELODY.length);
+        const idx = w_sMel % W_MELODY.length;
+        const note = W_MELODY[idx];
+        const t = w_startTime + ci * cycleLen + note.pos * cycleLen;
+        if (t >= audioCtx.currentTime + SCHEDULE_AHEAD) break;
+        playMelodyNote(note.freq, t, note.dur * eighthDur, layer3Node);
+        w_sMel++;
+      }
+    }
+
+    function w_visuals() {
+      if (!w.playing) return;
+      const now = audioCtx.currentTime;
+      const L = (60 / w.bpm) * 4;
+      let a4 = -1;
+      while (w_beatQueue.length && w_beatQueue[0].time <= now) {
+        const b = w_beatQueue.shift();
+        if (b.layer === 4) a4 = b.index;
+      }
+      if (a4 >= 0) {
+        highlightDot('w4-', a4, 12);
+        clearTimeout(w_d4);
+        w_d4 = setTimeout(() => highlightDot('w4-', -1, 12), (L / 4) * 400);
+      }
+      w_animFrame = requestAnimationFrame(w_visuals);
+    }
+
+    async function w_start() {
+      if (m.playing) m_stop();
+      if (u.playing) u_stop();
+      if (!audioCtx) initAudio();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+      w_s4 = 0; w_sMel = 0; w_beatQueue = [];
+      w_startTime = audioCtx.currentTime + 0.05;
+      ensureWorker();
+      worker.onmessage = () => {
+        if (m.playing) m_scheduler();
+        if (u.playing) u_scheduler();
+        if (w.playing) w_scheduler();
+      };
+      worker.postMessage('start');
+      w.playing = true;
+      w_animFrame = requestAnimationFrame(w_visuals);
+      document.getElementById('w-start-btn').textContent = 'stop';
+    }
+
+    function w_stop() {
+      w.playing = false;
+      if (!m.playing && !u.playing && worker) worker.postMessage('stop');
+      cancelAnimationFrame(w_animFrame);
+      clearTimeout(w_d4);
+      cancelScheduled(); w_beatQueue = [];
+      document.getElementById('w-start-btn').textContent = 'start';
+      highlightDot('w4-', -1, 12);
+    }
+
+    document.getElementById('w-start-btn').addEventListener('click', () => { if (!w.playing) w_start(); else w_stop(); });
+    document.getElementById('w-bpm').addEventListener('input', () => { document.getElementById('w-bpm-display').textContent = parseInt(document.getElementById('w-bpm').value, 10); });
+    document.getElementById('w-bpm').addEventListener('change', () => {
+      w.bpm = parseInt(document.getElementById('w-bpm').value, 10);
+      if (w.playing) { cancelScheduled(); w_beatQueue = []; w_s4 = 0; w_sMel = 0; w_startTime = audioCtx.currentTime + 0.05; }
+    });
+
+    // Update other exercises to also stop wave
+    const _m_start_orig = m_start;
+    m_start = async function() { if (w.playing) w_stop(); return _m_start_orig(); };
+    const _u_start_orig = u_start;
+    u_start = async function() { if (w.playing) w_stop(); return _u_start_orig(); };
   </script>
 </body>
 </html>
