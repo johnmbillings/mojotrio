@@ -325,11 +325,12 @@
     function ensureWorker() {
       if (!worker) {
         worker = createWorker();
-        worker.onmessage = () => {
-          if (m.playing) m_scheduler();
-          if (u.playing) u_scheduler();
-        };
       }
+      worker.onmessage = () => {
+        if (m.playing) m_scheduler();
+        if (u.playing) u_scheduler();
+        if (w.playing) w_scheduler();
+      };
     }
 
     // Build dots positioned by time fraction
@@ -671,11 +672,6 @@
       w_s4 = 0; w_sMel = 0; w_beatQueue = [];
       w_startTime = audioCtx.currentTime + 0.05;
       ensureWorker();
-      worker.onmessage = () => {
-        if (m.playing) m_scheduler();
-        if (u.playing) u_scheduler();
-        if (w.playing) w_scheduler();
-      };
       worker.postMessage('start');
       w.playing = true;
       w_animFrame = requestAnimationFrame(w_visuals);
