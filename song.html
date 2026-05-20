@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>loading…</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; }
+
+    .song-page {
+      max-width: 42rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .song-top {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .song-head {
+      text-align: center;
+      margin: 0.5rem 0 2rem;
+    }
+
+    .song-head-artist {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--mango);
+      margin: 0 0 0.6rem;
+      font-weight: 500;
+    }
+
+    .song-head-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.75rem, 5vw, 2.75rem);
+      letter-spacing: -0.02em;
+      margin: 0;
+      line-height: 1.1;
+      text-transform: lowercase;
+    }
+
+    #video-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 0.85rem;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+    }
+    #video-wrapper iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    .controls {
+      width: 100%;
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .play-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(20, 16, 28, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      backdrop-filter: blur(8px);
+      flex-wrap: wrap;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-display);
+      color: var(--ink-mute);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .speed-control #speed-display { color: var(--ink); font-weight: 500; min-width: 3.5em; text-align: right; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 9rem;
+      height: 4px;
+      background: var(--line-strong);
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 1.1rem;
+      height: 1.1rem;
+      background: var(--coral);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 94, 106, 0.5);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 1.1rem;
+      height: 1.1rem;
+      background: var(--coral);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 0;
+    }
+
+    .loops-wrap {
+      background: rgba(20, 16, 28, 0.45);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .loop-label {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--mango);
+      margin: 1rem 0 0.4rem;
+      padding-left: 0.25rem;
+    }
+    .loop-label:first-child { margin-top: 0; }
+
+    .loop {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(20, 16, 28, 0.5);
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .loop label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--ink-faint);
+    }
+
+    .loop input[type="text"] {
+      width: 4.6em;
+      padding: 0.35rem 0.5rem;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: rgba(10, 8, 16, 0.6);
+      border: 1px solid var(--line-strong);
+      border-radius: 0.35rem;
+      text-align: center;
+      transition: border-color 0.2s ease;
+    }
+    .loop input[type="text"]:focus { outline: none; border-color: var(--coral); }
+
+    .loop .loop-btn {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 94, 106, 0.1);
+      color: var(--coral);
+      border: 1px solid rgba(255, 94, 106, 0.3);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .loop .loop-btn:hover { background: var(--coral); color: var(--bg); }
+    .loop .loop-btn.active { background: var(--coral); color: var(--bg); }
+
+    #add-loop {
+      font-family: var(--font-display);
+      width: 2rem;
+      height: 2rem;
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 0;
+      background: transparent;
+      color: var(--ink-mute);
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    #add-loop:hover { color: var(--ink); border-color: var(--ink); }
+
+    #play-btn {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1.8rem;
+      background: var(--ink);
+      color: var(--bg);
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    #play-btn:hover {
+      transform: translateY(-1px);
+      background: var(--mango);
+      border-color: var(--mango);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="song-page">
+    <div class="song-top">
+      <a class="back" href="index.html">← back</a>
+    </div>
+
+    <div class="song-head">
+      <p class="song-head-artist" id="song-artist" style="display:none"></p>
+      <h1 class="song-head-title" id="song-title">loading…</h1>
+    </div>
+
+    <div id="video-wrapper">
+      <div id="player"></div>
+    </div>
+
+    <div class="controls">
+      <div class="play-row">
+        <button id="play-btn">play piece</button>
+        <div class="speed-control">
+          <span>speed</span>
+          <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1">
+          <span id="speed-display">1.00x</span>
+        </div>
+      </div>
+      <div class="loops-wrap">
+        <div id="loops"></div>
+        <button id="add-loop" title="add loop">+</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('s');
+
+    if (!slug) {
+      document.getElementById('song-title').textContent = 'no song specified';
+    } else {
+      init(slug);
+    }
+
+    function init(slug) {
+      let player;
+      let playerReady = false;
+      let loopActive = false;
+      let playActive = false;
+      let currentLoopIndex = null;
+      let loops = [];
+
+      const loopsContainer = document.getElementById('loops');
+      const addLoopBtn = document.getElementById('add-loop');
+      const playBtn = document.getElementById('play-btn');
+      const speedInput = document.getElementById('speed');
+      const speedDisplay = document.getElementById('speed-display');
+
+      function parseTime(t) {
+        const parts = t.split(':');
+        if (parts.length === 1) return parseFloat(parts[0]) || 0;
+        if (parts.length === 3) return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
+        return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+      }
+
+      function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+      }
+
+      function createLoopElement(startVal, endVal, label) {
+        if (label) {
+          const labelDiv = document.createElement('div');
+          labelDiv.className = 'loop-label';
+          labelDiv.textContent = label;
+          loopsContainer.appendChild(labelDiv);
+        }
+
+        const div = document.createElement('div');
+        div.className = 'loop';
+
+        const startLabel = document.createElement('label');
+        startLabel.textContent = 'start ';
+        const startInput = document.createElement('input');
+        startInput.type = 'text';
+        startInput.className = 'start';
+        startInput.value = startVal;
+        startLabel.appendChild(startInput);
+
+        const endLabel = document.createElement('label');
+        endLabel.textContent = 'end ';
+        const endInput = document.createElement('input');
+        endInput.type = 'text';
+        endInput.className = 'end';
+        endInput.value = endVal;
+        endLabel.appendChild(endInput);
+
+        const btn = document.createElement('button');
+        btn.textContent = 'loop';
+        btn.className = 'loop-btn';
+        const index = loops.length;
+        btn.addEventListener('click', () => handleLoopButton(index));
+
+        div.appendChild(startLabel);
+        div.appendChild(endLabel);
+        div.appendChild(btn);
+        loopsContainer.appendChild(div);
+
+        loops.push({ start: startInput, end: endInput, button: btn });
+      }
+
+      function stopLoop() {
+        if (currentLoopIndex !== null) {
+          loops[currentLoopIndex].button.textContent = 'loop';
+          loops[currentLoopIndex].button.classList.remove('active');
+        }
+        if (player && loopActive) {
+          player.pauseVideo();
+        }
+        loopActive = false;
+        currentLoopIndex = null;
+      }
+
+      function startLoop(i) {
+        if (!playerReady) return;
+        playActive = false;
+        playBtn.textContent = 'play piece';
+        player.pauseVideo();
+        currentLoopIndex = i;
+        const start = parseTime(loops[i].start.value);
+        player.seekTo(start, true);
+        player.playVideo();
+        loops[i].button.textContent = 'stop';
+        loops[i].button.classList.add('active');
+        loopActive = true;
+      }
+
+      function checkLoop() {
+        if (!loopActive || currentLoopIndex === null) return;
+        try {
+          const start = parseTime(loops[currentLoopIndex].start.value);
+          const end = parseTime(loops[currentLoopIndex].end.value);
+          if (end <= start) return;
+          if (player.getCurrentTime() >= end) {
+            player.seekTo(start, true);
+          }
+        } catch (e) {}
+      }
+
+      function handleLoopButton(i) {
+        if (loopActive && currentLoopIndex === i) {
+          stopLoop();
+        } else {
+          stopLoop();
+          startLoop(i);
+        }
+      }
+
+      addLoopBtn.addEventListener('click', () => {
+        if (loops.length === 0) {
+          createLoopElement('0:00', '0:10');
+          return;
+        }
+        const last = loops[loops.length - 1];
+        const startVal = last.end.value;
+        const startSec = parseTime(startVal);
+        createLoopElement(startVal, formatTime(startSec + 10));
+      });
+
+      playBtn.addEventListener('click', () => {
+        if (!playerReady) return;
+        if (!playActive) {
+          stopLoop();
+          player.seekTo(0, true);
+          player.playVideo();
+          playBtn.textContent = 'stop';
+          playActive = true;
+        } else {
+          player.pauseVideo();
+          playBtn.textContent = 'play piece';
+          playActive = false;
+        }
+      });
+
+      speedInput.addEventListener('input', () => {
+        if (!playerReady) return;
+        const r = parseFloat(speedInput.value);
+        player.setPlaybackRate(r);
+        speedDisplay.textContent = r.toFixed(2) + 'x';
+      });
+
+      fetch('songs.json')
+        .then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        })
+        .then(data => {
+          const song = (data.songs || {})[slug];
+          if (!song) {
+            document.getElementById('song-title').textContent = 'song not found';
+            return;
+          }
+
+          document.title = song.title + ' · mojo trio';
+
+          const parts = song.title.split(' — ');
+          const artistEl = document.getElementById('song-artist');
+          const titleEl = document.getElementById('song-title');
+          if (parts.length === 2) {
+            artistEl.textContent = parts[0];
+            artistEl.style.display = 'block';
+            titleEl.textContent = parts[1];
+          } else {
+            titleEl.textContent = song.title;
+          }
+
+          (song.loops || []).forEach((loop) => {
+            const start = Array.isArray(loop) ? loop[0] : loop.start;
+            const end = Array.isArray(loop) ? loop[1] : loop.end;
+            const label = Array.isArray(loop) ? null : loop.label;
+            createLoopElement(start, end, label);
+          });
+
+          let loopTimer = null;
+
+          window.onYouTubeIframeAPIReady = function () {
+            player = new YT.Player('player', {
+              width: '100%',
+              height: '100%',
+              videoId: song.videoId,
+              playerVars: {
+                origin: window.location.origin,
+                rel: 0
+              },
+              events: {
+                onReady: () => { playerReady = true; },
+                onStateChange: (event) => {
+                  clearInterval(loopTimer);
+                  if (event.data === YT.PlayerState.PLAYING && loopActive) {
+                    loopTimer = setInterval(checkLoop, 200);
+                  } else if (event.data === YT.PlayerState.ENDED) {
+                    playActive = false;
+                    playBtn.textContent = 'play piece';
+                  }
+                },
+                onError: () => {
+                  playerReady = false;
+                  stopLoop();
+                  playActive = false;
+                  playBtn.textContent = 'play piece';
+                }
+              }
+            });
+          };
+
+          if (window.YT && window.YT.Player) {
+            window.onYouTubeIframeAPIReady();
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load songs.json:', err);
+          document.getElementById('song-title').textContent = 'failed to load';
+        });
+    }
+  </script>
+</body>
+</html>

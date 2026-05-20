@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>virtual concert · mojo trio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; }
+
+    .concert-page {
+      max-width: 42rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .concert-top {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .concert-head {
+      text-align: center;
+      margin: 0.5rem 0 2rem;
+    }
+
+    .concert-head h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 6vw, 3rem);
+      letter-spacing: -0.03em;
+      margin: 0;
+      text-transform: lowercase;
+      background: var(--grad-warm);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      background-size: 200% 200%;
+      animation: gradientShift 8s ease-in-out infinite;
+    }
+
+    .concert-sub {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--ink-faint);
+      margin: 0.75rem 0 0;
+    }
+
+    #video-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 0.85rem;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+    }
+    #video-wrapper iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    .start-row {
+      display: flex;
+      justify-content: center;
+      margin: 1.5rem 0 1.25rem;
+    }
+
+    #start-btn {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 0.85rem 2rem;
+      background: var(--ink);
+      color: var(--bg);
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+    #start-btn:hover {
+      transform: translateY(-2px);
+      background: var(--mango);
+      border-color: var(--mango);
+      box-shadow: 0 12px 30px -10px rgba(255, 181, 71, 0.55);
+    }
+
+    .now-playing {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      text-align: center;
+      color: var(--ink-faint);
+      margin: 0.5rem 0 1rem;
+    }
+    .now-playing .current {
+      color: var(--coral);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: none;
+      font-size: 1.05rem;
+      display: block;
+      margin-top: 0.4rem;
+    }
+
+    .setlist {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .setlist li {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--ink-mute);
+      padding: 0.75rem 1rem;
+      background: rgba(20, 16, 28, 0.4);
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      transition: all 0.3s ease;
+    }
+    .setlist li.played {
+      color: var(--ink-faint);
+      opacity: 0.55;
+    }
+    .setlist li.active {
+      color: var(--ink);
+      border-color: var(--coral);
+      background: rgba(255, 94, 106, 0.08);
+    }
+
+    .loop-badge {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--ink-faint);
+      text-align: center;
+      margin: 1rem 0 0;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="concert-page">
+    <div class="concert-top">
+      <a class="back" href="index.html">← back</a>
+    </div>
+
+    <div class="concert-head">
+      <h1>virtual concert</h1>
+      <p class="concert-sub">full set, on loop</p>
+    </div>
+
+    <div id="video-wrapper">
+      <div id="player"></div>
+    </div>
+
+    <div class="start-row">
+      <button id="start-btn">start concert</button>
+    </div>
+
+    <p class="now-playing">
+      now playing
+      <span class="current" id="current-title">loading…</span>
+    </p>
+
+    <ul class="setlist" id="setlist"></ul>
+
+    <p class="loop-badge" id="loop-badge"></p>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    let playerReady = false;
+    let playlist = [];
+    let currentIndex = 0;
+    let loopCount = 0;
+    let started = false;
+    let currentEndTime = null;
+    let endCheckInterval = null;
+
+    const currentTitle = document.getElementById('current-title');
+    const setlistEl = document.getElementById('setlist');
+    const loopBadge = document.getElementById('loop-badge');
+    const startBtn = document.getElementById('start-btn');
+
+    function parseTime(t) {
+      const parts = t.split(':');
+      if (parts.length === 1) return parseFloat(parts[0]) || 0;
+      if (parts.length === 3) return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
+      return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+    }
+
+    function getSongBounds(song) {
+      return {
+        start: song.concertStart ? parseTime(song.concertStart) : 0,
+        end: song.concertEnd ? parseTime(song.concertEnd) : null
+      };
+    }
+
+    fetch('songs.json')
+      .then(r => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then(data => {
+        playlist = Object.entries(data.songs || {})
+          .sort((a, b) => (a[1].order || 99) - (b[1].order || 99))
+          .map(([slug, song]) => song);
+
+        if (playlist.length === 0) {
+          currentTitle.textContent = 'no songs yet';
+          startBtn.disabled = true;
+          startBtn.style.opacity = '0.4';
+          return;
+        }
+
+        playlist.forEach((song, i) => {
+          const li = document.createElement('li');
+          const parts = song.title.split(' — ');
+          li.textContent = parts.length === 2 ? parts[1] : song.title;
+          li.id = 'setlist-' + i;
+          setlistEl.appendChild(li);
+        });
+
+        currentTitle.textContent = 'ready';
+        initPlayer();
+      })
+      .catch(() => {
+        currentTitle.textContent = 'failed to load';
+      });
+
+    function initPlayer() {
+      const firstBounds = getSongBounds(playlist[0]);
+      window.onYouTubeIframeAPIReady = function () {
+        player = new YT.Player('player', {
+          width: '100%',
+          height: '100%',
+          videoId: playlist[0].videoId,
+          playerVars: {
+            origin: window.location.origin,
+            rel: 0,
+            controls: 1,
+            playsinline: 1,
+            start: Math.floor(firstBounds.start)
+          },
+          events: {
+            onReady: () => { playerReady = true; },
+            onStateChange: (event) => {
+              if (event.data === YT.PlayerState.ENDED && started) {
+                playNext();
+              }
+            },
+            onError: (event) => {
+              currentTitle.textContent = 'video error (' + event.data + ')';
+              console.error('YouTube error:', event.data);
+            }
+          }
+        });
+      };
+
+      if (window.YT && window.YT.Player) {
+        window.onYouTubeIframeAPIReady();
+      }
+    }
+
+    function updateSetlist() {
+      playlist.forEach((_, i) => {
+        const li = document.getElementById('setlist-' + i);
+        li.className = '';
+        if (i < currentIndex) li.className = 'played';
+        if (i === currentIndex) li.className = 'active';
+      });
+    }
+
+    function playSong(index, isFirstPlay) {
+      currentIndex = index;
+      const song = playlist[currentIndex];
+      const bounds = getSongBounds(song);
+      currentEndTime = bounds.end;
+      const parts = song.title.split(' — ');
+      currentTitle.textContent = parts.length === 2 ? parts[1] : song.title;
+      updateSetlist();
+      if (isFirstPlay) {
+        player.seekTo(bounds.start, true);
+        player.playVideo();
+      } else {
+        player.loadVideoById({
+          videoId: song.videoId,
+          startSeconds: bounds.start
+        });
+      }
+    }
+
+    function playNext() {
+      currentIndex++;
+      if (currentIndex >= playlist.length) {
+        currentIndex = 0;
+        loopCount++;
+        loopBadge.textContent = 'loop ' + (loopCount + 1);
+      }
+      playSong(currentIndex, false);
+    }
+
+    function checkEnd() {
+      if (!started || currentEndTime === null) return;
+      try {
+        if (player.getCurrentTime() >= currentEndTime) {
+          playNext();
+        }
+      } catch (e) {}
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (!playerReady || playlist.length === 0) return;
+      if (!started) {
+        started = true;
+        loopCount = 0;
+        loopBadge.textContent = 'loop 1';
+        startBtn.textContent = 'restart';
+        playSong(0, true);
+        if (!endCheckInterval) endCheckInterval = setInterval(checkEnd, 500);
+      } else {
+        currentIndex = 0;
+        loopCount = 0;
+        loopBadge.textContent = 'loop 1';
+        playSong(0, false);
+      }
+    });
+  </script>
+</body>
+</html>
