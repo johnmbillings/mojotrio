@@ -276,10 +276,8 @@
 
     let audioCtx = null;
     let rootOsc = null, fifthOsc = null;
-    let droneLfo = null;
     let droneFilter = null, droneGain = null;
     let formantA = null, formantB = null, bridgeHill = null;
-    let rootLfoGain = null, fifthLfoGain = null;
     let isPlaying = false;
     let selectedNote = 0;
     let selectedOctave = 3;
@@ -361,28 +359,16 @@
 
       rootOsc = audioCtx.createOscillator();
       fifthOsc = audioCtx.createOscillator();
-      droneLfo = audioCtx.createOscillator();
       droneFilter = audioCtx.createBiquadFilter();
       formantA = audioCtx.createBiquadFilter();
       formantB = audioCtx.createBiquadFilter();
       bridgeHill = audioCtx.createBiquadFilter();
       droneGain = audioCtx.createGain();
-      rootLfoGain = audioCtx.createGain();
-      fifthLfoGain = audioCtx.createGain();
 
       rootOsc.type = 'sawtooth';
       rootOsc.frequency.value = root;
       fifthOsc.type = 'sawtooth';
       fifthOsc.frequency.value = fifth;
-
-      // subtle vibrato
-      droneLfo.frequency.value = 5.2;
-      rootLfoGain.gain.value = root * 0.005;
-      fifthLfoGain.gain.value = fifth * 0.005;
-      droneLfo.connect(rootLfoGain);
-      droneLfo.connect(fifthLfoGain);
-      rootLfoGain.connect(rootOsc.frequency);
-      fifthLfoGain.connect(fifthOsc.frequency);
 
       // global rolloff
       droneFilter.type = 'lowpass';
@@ -418,7 +404,6 @@
 
       rootOsc.start();
       fifthOsc.start();
-      droneLfo.start();
 
       isPlaying = true;
       playBtn.textContent = 'stop drone';
@@ -426,14 +411,12 @@
     }
 
     function stopDrone() {
-      const oscs = [rootOsc, fifthOsc, droneLfo];
+      const oscs = [rootOsc, fifthOsc];
       oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch (e) {} });
 
       rootOsc = null; fifthOsc = null;
-      droneLfo = null;
       droneFilter = null; droneGain = null;
       formantA = null; formantB = null; bridgeHill = null;
-      rootLfoGain = null; fifthLfoGain = null;
 
       isPlaying = false;
       playBtn.textContent = 'start drone';
@@ -455,8 +438,6 @@
       const now = audioCtx.currentTime;
       rootOsc.frequency.setTargetAtTime(root, now, 0.03);
       fifthOsc.frequency.setTargetAtTime(fifth, now, 0.03);
-      rootLfoGain.gain.setTargetAtTime(root * 0.005, now, 0.03);
-      fifthLfoGain.gain.setTargetAtTime(fifth * 0.005, now, 0.03);
     }
 
     playBtn.addEventListener('click', () => {
