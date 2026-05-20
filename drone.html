@@ -268,9 +268,12 @@
 
       droneGain.gain.value = 0.35;
 
-      // Sub-audible high-frequency noise to keep car Bluetooth codecs
-      // from triggering silence/static detection (which would otherwise
-      // duck a sustained tone like this and produce audible pulsing).
+      // Sub-audible noise to keep car Bluetooth codecs from triggering
+      // silence/static detection (which would otherwise duck a sustained
+      // tone like this and produce audible pulsing). Put the noise in
+      // the band BT codecs actually preserve (1-4 kHz) — putting it up
+      // high (>6 kHz) is no good because SBC and similar codecs throw
+      // those frequencies away before they reach the speaker.
       const noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
       const noiseData = noiseBuf.getChannelData(0);
       for (let i = 0; i < noiseData.length; i++) noiseData[i] = Math.random() * 2 - 1;
@@ -278,11 +281,11 @@
       noiseSource.buffer = noiseBuf;
       noiseSource.loop = true;
       noiseFilter = audioCtx.createBiquadFilter();
-      noiseFilter.type = 'highpass';
-      noiseFilter.frequency.value = 6000;
-      noiseFilter.Q.value = 0.7;
+      noiseFilter.type = 'bandpass';
+      noiseFilter.frequency.value = 2000;
+      noiseFilter.Q.value = 0.6;
       noiseGain = audioCtx.createGain();
-      noiseGain.gain.value = 0.005;
+      noiseGain.gain.value = 0.012;
 
       rootOsc.connect(droneFilter);
       fifthOsc.connect(droneFilter);
