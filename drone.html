@@ -207,7 +207,7 @@
 
     <div class="drone-head">
       <h1 class="drone-title">drone</h1>
-      <p class="drone-sub">sustained cello tone</p>
+      <p class="drone-sub">root + fifth</p>
     </div>
 
     <div class="note-grid" id="notes"></div>
@@ -245,9 +245,15 @@
       return 440 * Math.pow(2, (midi - 69) / 12);
     }
 
+    // perfect (just) fifth ratio — 3:2 keeps the drone beat-free
+    const FIFTH_RATIO = 1.5;
+
     let audioCtx = null;
-    let droneOsc1 = null, droneOsc2 = null, droneLfo = null;
-    let droneFilter = null, droneGain = null, lfoGainNode = null;
+    let rootOsc1 = null, rootOsc2 = null;
+    let fifthOsc1 = null, fifthOsc2 = null;
+    let droneLfo = null;
+    let droneFilter = null, droneGain = null;
+    let rootLfoGain = null, fifthLfoGain = null;
     let isPlaying = false;
     let selectedNote = 0;
     let selectedOctave = 3;
@@ -289,11 +295,17 @@
       return noteFreq(selectedNote, selectedOctave);
     }
 
+    function fifthLabel() {
+      const fifthIdx = (selectedNote + 7) % 12;
+      const fifthOct = selectedOctave + Math.floor((selectedNote + 7) / 12);
+      return NOTES[fifthIdx].name + fifthOct;
+    }
+
     function updateStatus() {
       const note = NOTES[selectedNote];
-      const label = note.alt ? note.name + ' / ' + note.alt : note.name;
+      const rootName = note.name + selectedOctave;
       if (isPlaying) {
-        statusEl.textContent = label + selectedOctave;
+        statusEl.textContent = rootName + ' · ' + fifthLabel();
         statusEl.className = 'drone-status playing';
       } else {
         statusEl.textContent = '';
@@ -314,39 +326,57 @@
       if (!audioCtx) initAudio();
       if (audioCtx.state === 'suspended') await audioCtx.resume();
 
-      const freq = currentFreq();
+      const root = currentFreq();
+      const fifth = root * FIFTH_RATIO;
 
-      droneOsc1 = audioCtx.createOscillator();
-      droneOsc2 = audioCtx.createOscillator();
+      rootOsc1 = audioCtx.createOscillator();
+      rootOsc2 = audioCtx.createOscillator();
+      fifthOsc1 = audioCtx.createOscillator();
+      fifthOsc2 = audioCtx.createOscillator();
       droneLfo = audioCtx.createOscillator();
       droneFilter = audioCtx.createBiquadFilter();
       droneGain = audioCtx.createGain();
-      lfoGainNode = audioCtx.createGain();
+      rootLfoGain = audioCtx.createGain();
+      fifthLfoGain = audioCtx.createGain();
 
-      droneOsc1.type = 'sawtooth';
-      droneOsc1.frequency.value = freq;
-      droneOsc2.type = 'sawtooth';
-      droneOsc2.frequency.value = freq * 1.003;
+      rootOsc1.type = 'sawtooth';
+      rootOsc1.frequency.value = root;
+      rootOsc2.type = 'sawtooth';
+      rootOsc2.frequency.value = root * 1.003;
+
+      fifthOsc1.type = 'sawtooth';
+      fifthOsc1.frequency.value = fifth;
+      fifthOsc2.type = 'sawtooth';
+      fifthOsc2.frequency.value = fifth * 1.003;
 
       droneLfo.frequency.value = 5.2;
-      lfoGainNode.gain.value = freq * 0.005;
-      droneLfo.connect(lfoGainNode);
-      lfoGainNode.connect(droneOsc1.frequency);
-      lfoGainNode.connect(droneOsc2.frequency);
+      rootLfoGain.gain.value = root * 0.005;
+      fifthLfoGain.gain.value = fifth * 0.005;
+      droneLfo.connect(rootLfoGain);
+      droneLfo.connect(fifthLfoGain);
+      rootLfoGain.connect(rootOsc1.frequency);
+      rootLfoGain.connect(rootOsc2.frequency);
+      fifthLfoGain.connect(fifthOsc1.frequency);
+      fifthLfoGain.connect(fifthOsc2.frequency);
 
       droneFilter.type = 'lowpass';
-      droneFilter.frequency.value = Math.min(freq * 8, 4000);
+      droneFilter.frequency.value = Math.min(fifth * 8, 4500);
       droneFilter.Q.value = 0.7;
 
-      droneGain.gain.value = 0.45;
+      // a little quieter since we have twice the oscillators
+      droneGain.gain.value = 0.32;
 
-      droneOsc1.connect(droneFilter);
-      droneOsc2.connect(droneFilter);
+      rootOsc1.connect(droneFilter);
+      rootOsc2.connect(droneFilter);
+      fifthOsc1.connect(droneFilter);
+      fifthOsc2.connect(droneFilter);
       droneFilter.connect(droneGain);
       droneGain.connect(audioCtx.destination);
 
-      droneOsc1.start();
-      droneOsc2.start();
+      rootOsc1.start();
+      rootOsc2.start();
+      fifthOsc1.start();
+      fifthOsc2.start();
       droneLfo.start();
 
       isPlaying = true;
@@ -356,11 +386,14 @@
 
     function stopDrone() {
       if (!droneGain) return;
-      const oscs = [droneOsc1, droneOsc2, droneLfo];
+      const oscs = [rootOsc1, rootOsc2, fifthOsc1, fifthOsc2, droneLfo];
       oscs.forEach(o => { try { o.stop(); } catch (e) {} });
 
-      droneOsc1 = null; droneOsc2 = null; droneLfo = null;
-      droneFilter = null; droneGain = null; lfoGainNode = null;
+      rootOsc1 = null; rootOsc2 = null;
+      fifthOsc1 = null; fifthOsc2 = null;
+      droneLfo = null;
+      droneFilter = null; droneGain = null;
+      rootLfoGain = null; fifthLfoGain = null;
 
       isPlaying = false;
       playBtn.textContent = 'start drone';
@@ -368,13 +401,17 @@
     }
 
     function updateDroneFreq() {
-      if (!droneOsc1) return;
-      const freq = currentFreq();
+      if (!rootOsc1) return;
+      const root = currentFreq();
+      const fifth = root * FIFTH_RATIO;
       const now = audioCtx.currentTime;
-      droneOsc1.frequency.setTargetAtTime(freq, now, 0.03);
-      droneOsc2.frequency.setTargetAtTime(freq * 1.003, now, 0.03);
-      lfoGainNode.gain.setTargetAtTime(freq * 0.005, now, 0.03);
-      droneFilter.frequency.setTargetAtTime(Math.min(freq * 8, 4000), now, 0.03);
+      rootOsc1.frequency.setTargetAtTime(root, now, 0.03);
+      rootOsc2.frequency.setTargetAtTime(root * 1.003, now, 0.03);
+      fifthOsc1.frequency.setTargetAtTime(fifth, now, 0.03);
+      fifthOsc2.frequency.setTargetAtTime(fifth * 1.003, now, 0.03);
+      rootLfoGain.gain.setTargetAtTime(root * 0.005, now, 0.03);
+      fifthLfoGain.gain.setTargetAtTime(fifth * 0.005, now, 0.03);
+      droneFilter.frequency.setTargetAtTime(Math.min(fifth * 8, 4500), now, 0.03);
     }
 
     playBtn.addEventListener('click', () => {
