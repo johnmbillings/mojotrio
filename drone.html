@@ -159,6 +159,7 @@
     let rootOsc = null, fifthOsc = null;
     let droneFilter = null, droneGain = null;
     let formantA = null, formantB = null, bridgeHill = null;
+    let noiseSource = null, noiseFilter = null, noiseGain = null;
     let isPlaying = false;
     let selectedNote = 0;
     let selectedOctave = 3;
@@ -267,16 +268,36 @@
 
       droneGain.gain.value = 0.35;
 
+      // Sub-audible high-frequency noise to keep car Bluetooth codecs
+      // from triggering silence/static detection (which would otherwise
+      // duck a sustained tone like this and produce audible pulsing).
+      const noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
+      const noiseData = noiseBuf.getChannelData(0);
+      for (let i = 0; i < noiseData.length; i++) noiseData[i] = Math.random() * 2 - 1;
+      noiseSource = audioCtx.createBufferSource();
+      noiseSource.buffer = noiseBuf;
+      noiseSource.loop = true;
+      noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 6000;
+      noiseFilter.Q.value = 0.7;
+      noiseGain = audioCtx.createGain();
+      noiseGain.gain.value = 0.005;
+
       rootOsc.connect(droneFilter);
       fifthOsc.connect(droneFilter);
       droneFilter.connect(formantA);
       formantA.connect(formantB);
       formantB.connect(bridgeHill);
       bridgeHill.connect(droneGain);
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(droneGain);
       droneGain.connect(audioCtx.destination);
 
       rootOsc.start();
       fifthOsc.start();
+      noiseSource.start();
 
       isPlaying = true;
       playBtn.textContent = 'stop drone';
@@ -284,9 +305,10 @@
     }
 
     function stopDrone() {
-      const oscs = [rootOsc, fifthOsc];
-      oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch (e) {} });
+      const sources = [rootOsc, fifthOsc, noiseSource];
+      sources.forEach(o => { try { o.stop(); o.disconnect(); } catch (e) {} });
       rootOsc = null; fifthOsc = null;
+      noiseSource = null; noiseFilter = null; noiseGain = null;
       droneFilter = null; droneGain = null;
       formantA = null; formantB = null; bridgeHill = null;
 
