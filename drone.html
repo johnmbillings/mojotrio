@@ -249,10 +249,10 @@
     const FIFTH_RATIO = 1.5;
 
     let audioCtx = null;
-    let rootOsc1 = null, rootOsc2 = null;
-    let fifthOsc1 = null, fifthOsc2 = null;
+    let rootOsc = null, fifthOsc = null;
     let droneLfo = null;
     let droneFilter = null, droneGain = null;
+    let formantA = null, formantB = null, bridgeHill = null;
     let rootLfoGain = null, fifthLfoGain = null;
     let isPlaying = false;
     let selectedNote = 0;
@@ -333,54 +333,65 @@
       const root = currentFreq();
       const fifth = root * FIFTH_RATIO;
 
-      rootOsc1 = audioCtx.createOscillator();
-      rootOsc2 = audioCtx.createOscillator();
-      fifthOsc1 = audioCtx.createOscillator();
-      fifthOsc2 = audioCtx.createOscillator();
+      rootOsc = audioCtx.createOscillator();
+      fifthOsc = audioCtx.createOscillator();
       droneLfo = audioCtx.createOscillator();
       droneFilter = audioCtx.createBiquadFilter();
+      formantA = audioCtx.createBiquadFilter();
+      formantB = audioCtx.createBiquadFilter();
+      bridgeHill = audioCtx.createBiquadFilter();
       droneGain = audioCtx.createGain();
       rootLfoGain = audioCtx.createGain();
       fifthLfoGain = audioCtx.createGain();
 
-      rootOsc1.type = 'sawtooth';
-      rootOsc1.frequency.value = root;
-      rootOsc2.type = 'sawtooth';
-      rootOsc2.frequency.value = root * 1.003;
+      rootOsc.type = 'sawtooth';
+      rootOsc.frequency.value = root;
+      fifthOsc.type = 'sawtooth';
+      fifthOsc.frequency.value = fifth;
 
-      fifthOsc1.type = 'sawtooth';
-      fifthOsc1.frequency.value = fifth;
-      fifthOsc2.type = 'sawtooth';
-      fifthOsc2.frequency.value = fifth * 1.003;
-
+      // subtle vibrato
       droneLfo.frequency.value = 5.2;
       rootLfoGain.gain.value = root * 0.005;
       fifthLfoGain.gain.value = fifth * 0.005;
       droneLfo.connect(rootLfoGain);
       droneLfo.connect(fifthLfoGain);
-      rootLfoGain.connect(rootOsc1.frequency);
-      rootLfoGain.connect(rootOsc2.frequency);
-      fifthLfoGain.connect(fifthOsc1.frequency);
-      fifthLfoGain.connect(fifthOsc2.frequency);
+      rootLfoGain.connect(rootOsc.frequency);
+      fifthLfoGain.connect(fifthOsc.frequency);
 
+      // global rolloff
       droneFilter.type = 'lowpass';
-      droneFilter.frequency.value = Math.min(fifth * 8, 4500);
+      droneFilter.frequency.value = 5000;
       droneFilter.Q.value = 0.7;
 
-      // a little quieter since we have twice the oscillators
-      droneGain.gain.value = 0.32;
+      // cello body resonances (approximate)
+      // A0/T1 region — main "wood" resonance
+      formantA.type = 'peaking';
+      formantA.frequency.value = 250;
+      formantA.Q.value = 4;
+      formantA.gain.value = 8;
+      // B1+ corpus modes
+      formantB.type = 'peaking';
+      formantB.frequency.value = 450;
+      formantB.Q.value = 3;
+      formantB.gain.value = 6;
+      // "bridge hill" — gives cellos their projection around 1.5-2 kHz
+      bridgeHill.type = 'peaking';
+      bridgeHill.frequency.value = 1800;
+      bridgeHill.Q.value = 2;
+      bridgeHill.gain.value = 5;
 
-      rootOsc1.connect(droneFilter);
-      rootOsc2.connect(droneFilter);
-      fifthOsc1.connect(droneFilter);
-      fifthOsc2.connect(droneFilter);
-      droneFilter.connect(droneGain);
+      droneGain.gain.value = 0.35;
+
+      rootOsc.connect(droneFilter);
+      fifthOsc.connect(droneFilter);
+      droneFilter.connect(formantA);
+      formantA.connect(formantB);
+      formantB.connect(bridgeHill);
+      bridgeHill.connect(droneGain);
       droneGain.connect(audioCtx.destination);
 
-      rootOsc1.start();
-      rootOsc2.start();
-      fifthOsc1.start();
-      fifthOsc2.start();
+      rootOsc.start();
+      fifthOsc.start();
       droneLfo.start();
 
       isPlaying = true;
@@ -389,13 +400,13 @@
     }
 
     function stopDrone() {
-      const oscs = [rootOsc1, rootOsc2, fifthOsc1, fifthOsc2, droneLfo];
+      const oscs = [rootOsc, fifthOsc, droneLfo];
       oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch (e) {} });
 
-      rootOsc1 = null; rootOsc2 = null;
-      fifthOsc1 = null; fifthOsc2 = null;
+      rootOsc = null; fifthOsc = null;
       droneLfo = null;
       droneFilter = null; droneGain = null;
+      formantA = null; formantB = null; bridgeHill = null;
       rootLfoGain = null; fifthLfoGain = null;
 
       isPlaying = false;
@@ -412,17 +423,14 @@
     }
 
     function updateDroneFreq() {
-      if (!rootOsc1) return;
+      if (!rootOsc) return;
       const root = currentFreq();
       const fifth = root * FIFTH_RATIO;
       const now = audioCtx.currentTime;
-      rootOsc1.frequency.setTargetAtTime(root, now, 0.03);
-      rootOsc2.frequency.setTargetAtTime(root * 1.003, now, 0.03);
-      fifthOsc1.frequency.setTargetAtTime(fifth, now, 0.03);
-      fifthOsc2.frequency.setTargetAtTime(fifth * 1.003, now, 0.03);
+      rootOsc.frequency.setTargetAtTime(root, now, 0.03);
+      fifthOsc.frequency.setTargetAtTime(fifth, now, 0.03);
       rootLfoGain.gain.setTargetAtTime(root * 0.005, now, 0.03);
       fifthLfoGain.gain.setTargetAtTime(fifth * 0.005, now, 0.03);
-      droneFilter.frequency.setTargetAtTime(Math.min(fifth * 8, 4500), now, 0.03);
     }
 
     playBtn.addEventListener('click', () => {
