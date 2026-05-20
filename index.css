@@ -481,22 +481,17 @@ main {
   padding: 2.5rem 1rem 1.5rem;
   margin: 0 auto;
   max-width: 56rem;
+  color: var(--ink-mute);
 }
 
 .mark-icon {
-  display: inline-block;
-  width: 1.6rem;
-  height: 1.6rem;
-  background-color: var(--ink-mute);
-  opacity: 0.55;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  transition: background-color 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+  width: 1.8rem;
+  height: 1.8rem;
+  opacity: 0.6;
+  transition: color 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
   cursor: default;
+  display: inline-block;
+  color: inherit;
 }
 
 .mark-icon:hover {
@@ -504,13 +499,9 @@ main {
   transform: translateY(-3px);
 }
 
-.mark-spirit { -webkit-mask-image: url(spirit.svg); mask-image: url(spirit.svg); }
-.mark-frog   { -webkit-mask-image: url(frog.svg);   mask-image: url(frog.svg);   }
-.mark-toad   { -webkit-mask-image: url(toad.svg);   mask-image: url(toad.svg);   }
-
-.mark-spirit:hover { background-color: var(--coral); }
-.mark-frog:hover   { background-color: var(--mango); }
-.mark-toad:hover   { background-color: var(--lavender); }
+.mark-spirit:hover { color: var(--coral); }
+.mark-frog:hover   { color: var(--mango); }
+.mark-toad:hover   { color: var(--lavender); }
 
 /* ── footer ── */
 footer {
