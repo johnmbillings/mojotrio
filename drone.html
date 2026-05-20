@@ -316,8 +316,12 @@
     function initAudio() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       audioCtx.onstatechange = () => {
-        if ((audioCtx.state === 'interrupted' || audioCtx.state === 'suspended') && isPlaying) {
-          stopDrone();
+        if (!audioCtx) return;
+        // iOS suspends or interrupts the context when the screen turns off;
+        // resume() can report success but no audio flows. Tear down so the
+        // next "start drone" tap creates a fresh, working context.
+        if (audioCtx.state === 'interrupted' || audioCtx.state === 'suspended') {
+          if (isPlaying) stopDrone();
         }
       };
     }
@@ -385,9 +389,8 @@
     }
 
     function stopDrone() {
-      if (!droneGain) return;
       const oscs = [rootOsc1, rootOsc2, fifthOsc1, fifthOsc2, droneLfo];
-      oscs.forEach(o => { try { o.stop(); } catch (e) {} });
+      oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch (e) {} });
 
       rootOsc1 = null; rootOsc2 = null;
       fifthOsc1 = null; fifthOsc2 = null;
@@ -398,6 +401,14 @@
       isPlaying = false;
       playBtn.textContent = 'start drone';
       updateStatus();
+
+      // Close the AudioContext so the next start builds a fresh one — iOS
+      // can leave it in an unrecoverable state after screen lock.
+      if (audioCtx) {
+        const ctx = audioCtx;
+        audioCtx = null;
+        try { ctx.close(); } catch (e) {}
+      }
     }
 
     function updateDroneFreq() {
