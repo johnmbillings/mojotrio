@@ -44,71 +44,82 @@ code {
   color: var(--ember);
 }
 
-/* ── ambient smoke (rising wisps, layered for depth) ──
-   Two layers: background sits behind content, foreground passes in front.
-   Sizes, blur, opacity, and drift speed differ to sell the 3D depth. */
+/* ── ambient smoke ── rising curvilinear plumes
+   The shapes (.plume) are tall radial-gradient ellipses. The SVG filter
+   #smoke-warp (defined inline in each page) uses feTurbulence +
+   feDisplacementMap to warp the shapes into organic curves, and the
+   turbulence's seed animates so the warping itself evolves — giving
+   the smoke its sense of changing shape as it rises.
+   Two layers (bg behind content, fg passing in front) sell the depth. */
+.smoke-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .smoke {
   position: fixed;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
+  filter: url(#smoke-warp);
 }
 
 .smoke-bg { z-index: -1; }
 .smoke-fg { z-index: 5; }
 
-.wisp {
+.plume {
   position: absolute;
-  bottom: -14vh;
-  border-radius: 50%;
+  bottom: -22vh;
+  border-radius: 50% / 40%;
   background: radial-gradient(
-    ellipse at center,
-    rgba(235, 226, 207, 0.075) 0%,
-    rgba(235, 226, 207, 0.03) 35%,
-    rgba(235, 226, 207, 0) 72%
+    ellipse at 50% 60%,
+    rgba(235, 226, 207, 0.09) 0%,
+    rgba(235, 226, 207, 0.05) 30%,
+    rgba(235, 226, 207, 0.02) 55%,
+    rgba(235, 226, 207, 0) 78%
   );
   opacity: 0;
   will-change: transform, opacity;
-  animation: rise 30s linear infinite;
+  animation: plume-rise 30s linear infinite;
 }
 
-.smoke-bg .wisp {
+.smoke-bg .plume {
+  width: 5rem;
+  height: 15rem;
+}
+
+.smoke-fg .plume {
   width: 8rem;
-  height: 8rem;
-  filter: blur(10px);
+  height: 22rem;
 }
 
-.smoke-fg .wisp {
-  width: 13rem;
-  height: 13rem;
-  filter: blur(6px);
+@keyframes plume-rise {
+  0%   { transform: translate(0, 0) scaleY(0.7); opacity: 0; }
+  20%  { opacity: 0.85; }
+  78%  { opacity: 0.5; }
+  100% { transform: translate(var(--drift, 3rem), -120vh) scaleY(1.6); opacity: 0; }
 }
 
-@keyframes rise {
-  0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
-  18%  { opacity: 1; }
-  85%  { opacity: 0.6; }
-  100% { transform: translate(var(--drift, 2rem), -120vh) scale(1.5); opacity: 0; }
-}
+/* per-plume variants — position, drift, duration, delay */
+.smoke-bg .w1 { left:  6%; animation-duration: 34s; animation-delay:  -2s; --drift:  3rem; }
+.smoke-bg .w2 { left: 24%; animation-duration: 30s; animation-delay: -12s; --drift: -2rem; }
+.smoke-bg .w3 { left: 46%; animation-duration: 38s; animation-delay: -22s; --drift:  4rem; }
+.smoke-bg .w4 { left: 68%; animation-duration: 32s; animation-delay:  -8s; --drift: -3rem; }
+.smoke-bg .w5 { left: 88%; animation-duration: 36s; animation-delay: -26s; --drift:  2rem; }
 
-/* per-wisp variants: position, duration, delay, drift */
-.smoke-bg .w1 { left:  8%;  animation-duration: 34s; animation-delay:  -4s; --drift:  2rem;   }
-.smoke-bg .w2 { left: 28%;  animation-duration: 30s; animation-delay: -12s; --drift: -1.5rem; }
-.smoke-bg .w3 { left: 52%;  animation-duration: 38s; animation-delay: -22s; --drift:  2.5rem; }
-.smoke-bg .w4 { left: 74%;  animation-duration: 32s; animation-delay:  -8s; --drift: -2rem;   }
-.smoke-bg .w5 { left: 90%;  animation-duration: 36s; animation-delay: -26s; --drift:  1.3rem; }
-
-.smoke-fg .w1 { left: 18%;  animation-duration: 26s; animation-delay: -10s; --drift:  3rem;   }
-.smoke-fg .w2 { left: 58%;  animation-duration: 22s; animation-delay: -18s; --drift: -2.5rem; }
-.smoke-fg .w3 { left: 82%;  animation-duration: 28s; animation-delay:  -2s; --drift:  2rem;   }
+.smoke-fg .w1 { left: 16%; animation-duration: 26s; animation-delay: -10s; --drift:  4rem;   }
+.smoke-fg .w2 { left: 54%; animation-duration: 22s; animation-delay: -18s; --drift: -3.5rem; }
+.smoke-fg .w3 { left: 80%; animation-duration: 28s; animation-delay:  -2s; --drift:  2.5rem; }
 
 @media (max-width: 640px) {
-  .smoke-bg .wisp { width: 6rem;  height: 6rem;  }
-  .smoke-fg .wisp { width: 9rem;  height: 9rem;  }
+  .smoke-bg .plume { width: 4rem;  height: 11rem; }
+  .smoke-fg .plume { width: 6rem;  height: 16rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wisp { animation: none; opacity: 0; }
+  .plume { animation: none; opacity: 0; }
 }
 
 /* ── header ── */
