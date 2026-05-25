@@ -3,51 +3,54 @@
 Practice site for Mojo Trio (Don Strong, Vicki, John Cello). Static HTML, no build step, hosted on GitHub Pages at [mojotrio.learndoteach.org](https://mojotrio.learndoteach.org).
 
 ## What it does
-- **Landing page** — lists pieces grouped by concert/set
-- **Song pages** — YouTube embed with loop controls and adjustable speed for working on specific passages
-- **Virtual concert** — plays all pieces in order on loop
-- **Drone** — sustained cello tone for tuning / practice
+- **Landing page** — lists the songs in the set
+- **Song pages** — plays the band's recording with section markers; tap a section to jump there or loop it, plus adjustable speed
+- **Virtual concert** — plays the whole set back to back, on loop
+- **Drone** — sustained root + fifth tone for tuning / practice
 
 ## Files
 | File | Purpose |
 |---|---|
 | `index.html` + `index.css` | Landing page + shared styles |
-| `song.html` | Song practice page (loop controls, speed, YouTube) |
-| `concert.html` | Virtual concert (plays all songs in order on loop) |
+| `song.html` | Song practice page (audio playback, section loops, speed) |
+| `concert.html` | Virtual concert (plays all songs in order, on loop) |
 | `drone.html` | Sustained drone tone tool |
-| `songs.json` | Song data, concert metadata, loop times |
+| `songs.json` | Song list, audio paths, section markers |
+| `audio/*.m4a` | The band's recordings |
 | `CNAME` | GitHub Pages custom domain |
 
 ## Adding a song
-Edit `songs.json`. Example:
+1. Drop the recording in `audio/` (m4a or mp3).
+2. Add an entry to `songs.json`:
+
 ```json
 {
   "concerts": {
-    "summer-set": { "name": "summer set", "date": "july 2026" }
+    "setlist": { "name": "the set", "date": "" }
   },
   "songs": {
-    "artist-track-name": {
-      "title": "artist name — track title",
-      "videoId": "YOUTUBE_VIDEO_ID",
-      "concert": "summer-set",
+    "song-slug": {
+      "title": "song name",
+      "audio": "audio/song-slug.m4a",
+      "concert": "setlist",
       "order": 1,
-      "concertStart": "0:10",
-      "concertEnd": "3:45",
-      "loops": [
-        { "start": "0:10", "end": "0:42", "label": "intro" },
-        { "start": "0:42", "end": "1:30", "label": "verse 1" }
+      "sections": [
+        { "label": "intro",   "start": "0:00" },
+        { "label": "verse 1", "start": "0:21" },
+        { "label": "chorus",  "start": "1:00" }
       ]
     }
   }
 }
 ```
 
-- `title` — uses ` — ` (space, em-dash, space) to split artist from track name
-- `videoId` — the bit after `v=` in a YouTube URL
+- `title` — shown on the landing page and song page
+- `audio` — path to the recording in `audio/`
 - `concert` — references a key in `concerts`
-- `order` — playback order inside the concert
-- `concertStart` / `concertEnd` — optional bounds used by the virtual concert
-- `loops` — list of practice sections; `label` is optional
+- `order` — order inside the set (also the virtual-concert order)
+- `sections` — list of `{ label, start }`. Each section loops from its
+  `start` to the next section's `start` (the last one runs to the end of
+  the track). `start` is `m:ss`.
 
 ## Develop
 Just open `index.html`. For `fetch()` to work locally:

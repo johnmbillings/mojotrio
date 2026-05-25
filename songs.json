@@ -1,4 +1,99 @@
 {
-  "concerts": {},
-  "songs": {}
+  "concerts": {
+    "setlist": { "name": "the set", "date": "" }
+  },
+  "songs": {
+    "clocks": {
+      "title": "clocks",
+      "audio": "audio/clocks.m4a",
+      "concert": "setlist",
+      "order": 1,
+      "sections": [
+        { "label": "intro",    "start": "0:00" },
+        { "label": "verse 1",  "start": "0:22" },
+        { "label": "chorus",   "start": "1:00" },
+        { "label": "intro",    "start": "1:23" },
+        { "label": "verse 2",  "start": "1:33" },
+        { "label": "chorus",   "start": "2:10" },
+        { "label": "intro",    "start": "2:35" },
+        { "label": "bridge",   "start": "2:43" },
+        { "label": "chorus",   "start": "3:23" },
+        { "label": "intro",    "start": "3:49" }
+      ]
+    },
+    "weatherman": {
+      "title": "weatherman",
+      "audio": "audio/weatherman.m4a",
+      "concert": "setlist",
+      "order": 2,
+      "sections": [
+        { "label": "intro",   "start": "0:00" },
+        { "label": "verse 1", "start": "0:15" },
+        { "label": "chorus",  "start": "0:55" },
+        { "label": "verse 2", "start": "1:27" },
+        { "label": "chorus",  "start": "2:08" },
+        { "label": "bridge",  "start": "2:34" },
+        { "label": "verse 3", "start": "3:11" }
+      ]
+    },
+    "share-the-load": {
+      "title": "share the load",
+      "audio": "audio/share-the-load.m4a",
+      "concert": "setlist",
+      "order": 3,
+      "sections": [
+        { "label": "intro",      "start": "0:00" },
+        { "label": "verse 1",    "start": "0:11" },
+        { "label": "pre chorus", "start": "0:26" },
+        { "label": "verse 2",    "start": "0:36" },
+        { "label": "pre chorus", "start": "0:58" },
+        { "label": "verse 3",    "start": "1:20" },
+        { "label": "pre chorus", "start": "1:44" },
+        { "label": "bridge",     "start": "2:05" },
+        { "label": "outro",      "start": "2:42" },
+        { "label": "fade out",   "start": "3:19" }
+      ]
+    },
+    "hold-on": {
+      "title": "hold on",
+      "audio": "audio/hold-on.m4a",
+      "concert": "setlist",
+      "order": 4,
+      "sections": [
+        { "label": "intro",      "start": "0:00" },
+        { "label": "chorus",     "start": "0:43" },
+        { "label": "verse 1",    "start": "1:08" },
+        { "label": "pre chorus", "start": "1:33" },
+        { "label": "chorus",     "start": "1:58" },
+        { "label": "verse 2",    "start": "2:22" },
+        { "label": "pre chorus", "start": "2:46" },
+        { "label": "chorus",     "start": "3:11" },
+        { "label": "outro",      "start": "3:35" },
+        { "label": "revamp",     "start": "3:46" },
+        { "label": "revamp v2",  "start": "4:31" },
+        { "label": "change",     "start": "5:05" },
+        { "label": "fade out",   "start": "5:11" }
+      ]
+    },
+    "old-backyard": {
+      "title": "the old backyard",
+      "audio": "audio/old-backyard.m4a",
+      "concert": "setlist",
+      "order": 5,
+      "sections": [
+        { "label": "intro",       "start": "0:00" },
+        { "label": "verse 1",     "start": "0:21" },
+        { "label": "pre chorus",  "start": "0:54" },
+        { "label": "verse 2",     "start": "1:10" },
+        { "label": "pre chorus",  "start": "1:46" },
+        { "label": "chorus",      "start": "1:59" },
+        { "label": "verse 3",     "start": "2:27" },
+        { "label": "pre chorus",  "start": "3:02" },
+        { "label": "chorus",      "start": "3:16" },
+        { "label": "repeat line", "start": "3:41" },
+        { "label": "verse 4",     "start": "3:58" },
+        { "label": "chorus",      "start": "4:34" }
+      ]
+    }
+  }
 }

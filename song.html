@@ -14,13 +14,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.75rem;
+      gap: 1.5rem;
     }
 
     .song-title {
       font-family: var(--font-serif);
       font-weight: 300;
-      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-size: clamp(1.8rem, 4.5vw, 2.6rem);
       letter-spacing: 0.04em;
       text-transform: lowercase;
       margin: 0;
@@ -28,42 +28,35 @@
       line-height: 1.2;
     }
 
-    .song-artist-line {
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 0.95rem;
-      letter-spacing: 0.06em;
-      color: var(--ink-mute);
-      text-align: center;
-      margin: 0 0 0.3rem;
-    }
-
-    #video-wrapper {
-      width: min(560px, 92vw);
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border: 1px solid var(--line-strong);
-    }
-    #video-wrapper iframe { width: 100%; height: 100%; border: 0; display: block; }
-
-    .controls {
+    .transport {
       width: min(560px, 92vw);
       display: flex;
       flex-direction: column;
-      gap: 0.85rem;
-      align-items: stretch;
+      gap: 0.9rem;
     }
 
-    .play-row {
+    .transport-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
       flex-wrap: wrap;
-      padding: 0.65rem 0.85rem;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
     }
+
+    #play-btn {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--ink);
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      padding: 0.5rem 1.7rem;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: color 0.25s ease, border-color 0.25s ease;
+      min-width: 7rem;
+    }
+    #play-btn:hover { color: var(--ember); border-color: var(--ember); }
 
     .speed-control {
       display: flex;
@@ -79,162 +72,95 @@
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      width: 9rem;
+      width: 8rem;
       height: 2px;
       background: var(--line-strong);
       outline: none;
     }
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 0.85rem;
-      height: 0.85rem;
-      background: var(--ember);
-      border-radius: 50%;
-      cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      width: 0.85rem; height: 0.85rem;
+      background: var(--ember); border-radius: 50%; cursor: pointer;
     }
     input[type="range"]::-moz-range-thumb {
-      width: 0.85rem;
-      height: 0.85rem;
-      background: var(--ember);
-      border-radius: 50%;
+      width: 0.85rem; height: 0.85rem;
+      background: var(--ember); border-radius: 50%; cursor: pointer; border: 0;
+    }
+
+    /* progress / scrubber */
+    .scrubber {
+      position: relative;
+      width: 100%;
+      height: 4px;
+      background: var(--line-strong);
       cursor: pointer;
-      border: 0;
     }
-
-    #loops { display: flex; flex-direction: column; gap: 0.35rem; }
-
-    .loop-label {
+    .scrubber-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 0%;
+      background: var(--ember);
+    }
+    .time-row {
+      display: flex;
+      justify-content: space-between;
       font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 0.9rem;
-      color: var(--ink-mute);
+      font-size: 0.85rem;
+      color: var(--ink-faint);
       letter-spacing: 0.04em;
-      margin: 0.85rem 0 0.1rem;
-      padding-left: 0.1rem;
     }
-    .loop-label:first-child { margin-top: 0; }
 
-    .loop {
+    /* section list */
+    .sections {
+      width: min(560px, 92vw);
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+    }
+    .section {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
-      padding: 0.45rem 0.6rem;
-      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 0.65rem 0.6rem;
       border-bottom: 1px solid var(--line);
-    }
-
-    .loop label {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 0.9rem;
-      color: var(--ink-mute);
-    }
-
-    .loop input[type="text"] {
-      width: 4.4em;
-      padding: 0.25rem 0.4rem;
-      font-family: var(--font-serif);
-      font-size: 0.95rem;
-      color: var(--ink);
-      background: transparent;
-      border: 1px solid var(--line-strong);
-      text-align: center;
-      transition: border-color 0.2s ease;
-    }
-    .loop input[type="text"]:focus { outline: none; border-color: var(--ember); }
-
-    button, .loop-btn {
-      background: transparent;
-      border: 1px solid var(--line-strong);
-      color: var(--ink-mute);
-      font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 0.9rem;
-      padding: 0.35rem 0.95rem;
       cursor: pointer;
-      letter-spacing: 0.04em;
-      transition: color 0.25s ease, border-color 0.25s ease;
+      transition: background 0.2s ease;
     }
-    button:hover, .loop-btn:hover {
-      color: var(--ember);
-      border-color: var(--ember);
+    .section:hover { background: rgba(235, 226, 207, 0.03); }
+    .section.active .section-label { color: var(--ember); }
+    .section-time {
+      font-family: var(--font-serif);
+      font-variant-numeric: tabular-nums;
+      color: var(--ink-faint);
+      font-size: 0.95rem;
+      min-width: 3.2em;
     }
-
-    .loop .loop-btn { margin-left: auto; }
-    .loop .loop-btn.active { color: var(--ember); border-color: var(--ember); }
-
-    #add-loop {
-      align-self: center;
-      width: 2rem;
-      height: 2rem;
-      padding: 0;
+    .section-label {
+      flex: 1;
       font-size: 1.1rem;
-      line-height: 1;
-      border-radius: 50%;
-      margin-top: 0.4rem;
-    }
-
-    #play-btn {
-      align-self: center;
-      padding: 0.55rem 1.6rem;
       color: var(--ink);
-      letter-spacing: 0.06em;
+      letter-spacing: 0.01em;
     }
+    .loop-btn {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--ink-mute);
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.85rem;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    .loop-btn:hover { color: var(--ember); border-color: var(--ember); }
+    .loop-btn.active { color: var(--bg); background: var(--ember); border-color: var(--ember); }
   </style>
 </head>
 <body>
-  <svg class="smoke smoke-bg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" viewBox="0 0 100 140">
-    <defs>
-      <filter id="bg-warp" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035 0.08" numOctaves="2" seed="3" stitchTiles="stitch" result="noise">
-          <animate attributeName="seed" values="3;203" dur="90s" repeatCount="indefinite"/>
-        </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" result="displaced"/>
-        <feGaussianBlur in="displaced" stdDeviation="1.2"/>
-      </filter>
-      <radialGradient id="bg-puff" cx="50%" cy="55%" r="50%">
-      <stop offset="0%" stop-color="rgba(235,226,207,0.12)"/>
-      <stop offset="50%" stop-color="rgba(235,226,207,0.05)"/>
-      <stop offset="100%" stop-color="rgba(235,226,207,0)"/>
-      </radialGradient>
-    </defs>
-    <g filter="url(#bg-warp)">
-      <ellipse cx="8" cy="158" rx="4" ry="14" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="34s" begin="-2s" repeatCount="indefinite"/><animate attributeName="cx" values="8;11" dur="34s" begin="-2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="34s" begin="-2s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="26" cy="158" rx="5" ry="16" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="30s" begin="-12s" repeatCount="indefinite"/><animate attributeName="cx" values="26;24" dur="30s" begin="-12s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="30s" begin="-12s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="48" cy="158" rx="4" ry="13" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="38s" begin="-22s" repeatCount="indefinite"/><animate attributeName="cx" values="48;52" dur="38s" begin="-22s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="38s" begin="-22s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="68" cy="158" rx="5" ry="15" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="32s" begin="-8s" repeatCount="indefinite"/><animate attributeName="cx" values="68;65" dur="32s" begin="-8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="32s" begin="-8s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="90" cy="158" rx="4" ry="14" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="36s" begin="-26s" repeatCount="indefinite"/><animate attributeName="cx" values="90;92" dur="36s" begin="-26s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="36s" begin="-26s" repeatCount="indefinite"/></ellipse>
-    </g>
-  </svg>
-  <svg class="smoke smoke-fg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" viewBox="0 0 100 140">
-    <defs>
-      <filter id="fg-warp" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.025 0.06" numOctaves="2" seed="7" stitchTiles="stitch" result="noise">
-          <animate attributeName="seed" values="7;207" dur="70s" repeatCount="indefinite"/>
-        </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" result="displaced"/>
-        <feGaussianBlur in="displaced" stdDeviation="1.5"/>
-      </filter>
-      <radialGradient id="fg-puff" cx="50%" cy="55%" r="50%">
-      <stop offset="0%" stop-color="rgba(235,226,207,0.15)"/>
-      <stop offset="50%" stop-color="rgba(235,226,207,0.06)"/>
-      <stop offset="100%" stop-color="rgba(235,226,207,0)"/>
-      </radialGradient>
-    </defs>
-    <g filter="url(#fg-warp)">
-      <ellipse cx="18" cy="160" rx="7" ry="20" fill="url(#fg-puff)" opacity="0"><animate attributeName="cy" values="160;-100" dur="26s" begin="-10s" repeatCount="indefinite"/><animate attributeName="cx" values="18;22" dur="26s" begin="-10s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="26s" begin="-10s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="54" cy="160" rx="8" ry="22" fill="url(#fg-puff)" opacity="0"><animate attributeName="cy" values="160;-100" dur="22s" begin="-18s" repeatCount="indefinite"/><animate attributeName="cx" values="54;50" dur="22s" begin="-18s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="22s" begin="-18s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="82" cy="160" rx="6" ry="18" fill="url(#fg-puff)" opacity="0"><animate attributeName="cy" values="160;-100" dur="28s" begin="-2s" repeatCount="indefinite"/><animate attributeName="cx" values="82;85" dur="28s" begin="-2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="28s" begin="-2s" repeatCount="indefinite"/></ellipse>
-    </g>
-  </svg>
-<a class="back" href="index.html">← back</a>
+  <a class="back" href="index.html">← back</a>
 
   <div class="page-header">
-    <p class="song-artist-line" id="song-artist" style="display:none"></p>
     <h1 class="song-title" id="song-title">loading…</h1>
     <div class="marks-row" aria-hidden="true">
       <img class="m-spirit" src="feather.svg" alt="">
@@ -243,229 +169,184 @@
     </div>
   </div>
 
-  <div id="video-wrapper">
-    <div id="player"></div>
-  </div>
+  <audio id="audio" preload="metadata"></audio>
 
-  <div class="controls">
-    <div class="play-row">
-      <button id="play-btn">play piece</button>
+  <div class="transport">
+    <div class="transport-row">
+      <button id="play-btn">play</button>
       <div class="speed-control">
         <span>speed</span>
-        <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1">
+        <input id="speed" type="range" min="0.5" max="1.5" step="0.05" value="1">
         <span id="speed-display">1.00×</span>
       </div>
     </div>
-    <div id="loops"></div>
-    <button id="add-loop" title="add loop">+</button>
+    <div class="scrubber" id="scrubber"><div class="scrubber-fill" id="scrubber-fill"></div></div>
+    <div class="time-row"><span id="cur-time">0:00</span><span id="dur-time">0:00</span></div>
   </div>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <ul class="sections" id="sections"></ul>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('s');
-    if (!slug) {
-      document.getElementById('song-title').textContent = 'no song specified';
-    } else {
-      init(slug);
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('play-btn');
+    const speedInput = document.getElementById('speed');
+    const speedDisplay = document.getElementById('speed-display');
+    const scrubber = document.getElementById('scrubber');
+    const scrubberFill = document.getElementById('scrubber-fill');
+    const curTimeEl = document.getElementById('cur-time');
+    const durTimeEl = document.getElementById('dur-time');
+    const sectionsEl = document.getElementById('sections');
+    const titleEl = document.getElementById('song-title');
+
+    let loopStart = null, loopEnd = null, loopIndex = null;
+    let sections = [];
+
+    function parseTime(t) {
+      const parts = String(t).split(':');
+      if (parts.length === 1) return parseFloat(parts[0]) || 0;
+      return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+    }
+    function fmt(sec) {
+      if (!isFinite(sec)) return '0:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
     }
 
-    function init(slug) {
-      let player;
-      let playerReady = false;
-      let loopActive = false;
-      let playActive = false;
-      let currentLoopIndex = null;
-      let loops = [];
-
-      const loopsContainer = document.getElementById('loops');
-      const addLoopBtn = document.getElementById('add-loop');
-      const playBtn = document.getElementById('play-btn');
-      const speedInput = document.getElementById('speed');
-      const speedDisplay = document.getElementById('speed-display');
-
-      function parseTime(t) {
-        const parts = t.split(':');
-        if (parts.length === 1) return parseFloat(parts[0]) || 0;
-        if (parts.length === 3) return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
-        return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
-      }
-
-      function formatTime(sec) {
-        const m = Math.floor(sec / 60);
-        const s = Math.floor(sec % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
-      }
-
-      function createLoopElement(startVal, endVal, label) {
-        if (label) {
-          const labelDiv = document.createElement('div');
-          labelDiv.className = 'loop-label';
-          labelDiv.textContent = label;
-          loopsContainer.appendChild(labelDiv);
-        }
-        const div = document.createElement('div');
-        div.className = 'loop';
-
-        const startLabel = document.createElement('label');
-        startLabel.textContent = 'start ';
-        const startInput = document.createElement('input');
-        startInput.type = 'text';
-        startInput.className = 'start';
-        startInput.value = startVal;
-        startLabel.appendChild(startInput);
-
-        const endLabel = document.createElement('label');
-        endLabel.textContent = 'end ';
-        const endInput = document.createElement('input');
-        endInput.type = 'text';
-        endInput.className = 'end';
-        endInput.value = endVal;
-        endLabel.appendChild(endInput);
-
-        const btn = document.createElement('button');
-        btn.textContent = 'loop';
-        btn.className = 'loop-btn';
-        const index = loops.length;
-        btn.addEventListener('click', () => handleLoopButton(index));
-
-        div.appendChild(startLabel);
-        div.appendChild(endLabel);
-        div.appendChild(btn);
-        loopsContainer.appendChild(div);
-
-        loops.push({ start: startInput, end: endInput, button: btn });
-      }
-
-      function stopLoop() {
-        if (currentLoopIndex !== null) {
-          loops[currentLoopIndex].button.textContent = 'loop';
-          loops[currentLoopIndex].button.classList.remove('active');
-        }
-        if (player && loopActive) player.pauseVideo();
-        loopActive = false;
-        currentLoopIndex = null;
-      }
-
-      function startLoop(i) {
-        if (!playerReady) return;
-        playActive = false;
-        playBtn.textContent = 'play piece';
-        player.pauseVideo();
-        currentLoopIndex = i;
-        const start = parseTime(loops[i].start.value);
-        player.seekTo(start, true);
-        player.playVideo();
-        loops[i].button.textContent = 'stop';
-        loops[i].button.classList.add('active');
-        loopActive = true;
-      }
-
-      function checkLoop() {
-        if (!loopActive || currentLoopIndex === null) return;
-        try {
-          const start = parseTime(loops[currentLoopIndex].start.value);
-          const end = parseTime(loops[currentLoopIndex].end.value);
-          if (end <= start) return;
-          if (player.getCurrentTime() >= end) player.seekTo(start, true);
-        } catch (e) {}
-      }
-
-      function handleLoopButton(i) {
-        if (loopActive && currentLoopIndex === i) stopLoop();
-        else { stopLoop(); startLoop(i); }
-      }
-
-      addLoopBtn.addEventListener('click', () => {
-        if (loops.length === 0) { createLoopElement('0:00', '0:10'); return; }
-        const last = loops[loops.length - 1];
-        const startVal = last.end.value;
-        const startSec = parseTime(startVal);
-        createLoopElement(startVal, formatTime(startSec + 10));
-      });
-
-      playBtn.addEventListener('click', () => {
-        if (!playerReady) return;
-        if (!playActive) {
-          stopLoop();
-          player.seekTo(0, true);
-          player.playVideo();
-          playBtn.textContent = 'stop';
-          playActive = true;
-        } else {
-          player.pauseVideo();
-          playBtn.textContent = 'play piece';
-          playActive = false;
-        }
-      });
-
-      speedInput.addEventListener('input', () => {
-        if (!playerReady) return;
-        const r = parseFloat(speedInput.value);
-        player.setPlaybackRate(r);
-        speedDisplay.textContent = r.toFixed(2) + '×';
-      });
-
+    if (!slug) {
+      titleEl.textContent = 'no song specified';
+    } else {
       fetch('songs.json')
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(data => {
           const song = (data.songs || {})[slug];
-          if (!song) { document.getElementById('song-title').textContent = 'song not found'; return; }
-
+          if (!song) { titleEl.textContent = 'song not found'; return; }
           document.title = song.title + ' · mojo trio';
+          titleEl.textContent = song.title;
+          audio.src = song.audio;
 
-          const parts = song.title.split(' — ');
-          const artistEl = document.getElementById('song-artist');
-          const titleEl = document.getElementById('song-title');
-          if (parts.length === 2) {
-            artistEl.textContent = parts[0];
-            artistEl.style.display = 'block';
-            titleEl.textContent = parts[1];
-          } else {
-            titleEl.textContent = song.title;
+          // Normalize to sections with start (seconds) + label. Support legacy "loops".
+          if (Array.isArray(song.sections)) {
+            sections = song.sections.map(s => ({ label: s.label, start: parseTime(s.start) }));
+          } else if (Array.isArray(song.loops)) {
+            sections = song.loops.map(l => ({
+              label: l.label || '',
+              start: parseTime(Array.isArray(l) ? l[0] : l.start)
+            }));
           }
-
-          (song.loops || []).forEach((loop) => {
-            const start = Array.isArray(loop) ? loop[0] : loop.start;
-            const end = Array.isArray(loop) ? loop[1] : loop.end;
-            const label = Array.isArray(loop) ? null : loop.label;
-            createLoopElement(start, end, label);
-          });
-
-          let loopTimer = null;
-          window.onYouTubeIframeAPIReady = function () {
-            player = new YT.Player('player', {
-              width: '100%',
-              height: '100%',
-              videoId: song.videoId,
-              playerVars: { origin: window.location.origin, rel: 0 },
-              events: {
-                onReady: () => { playerReady = true; },
-                onStateChange: (event) => {
-                  clearInterval(loopTimer);
-                  if (event.data === YT.PlayerState.PLAYING && loopActive) {
-                    loopTimer = setInterval(checkLoop, 200);
-                  } else if (event.data === YT.PlayerState.ENDED) {
-                    playActive = false;
-                    playBtn.textContent = 'play piece';
-                  }
-                },
-                onError: () => {
-                  playerReady = false;
-                  stopLoop();
-                  playActive = false;
-                  playBtn.textContent = 'play piece';
-                }
-              }
-            });
-          };
-          if (window.YT && window.YT.Player) window.onYouTubeIframeAPIReady();
+          renderSections();
         })
-        .catch(err => {
-          console.error('Failed to load songs.json:', err);
-          document.getElementById('song-title').textContent = 'failed to load';
-        });
+        .catch(err => { console.error(err); titleEl.textContent = 'failed to load'; });
     }
+
+    function sectionEnd(i) {
+      // end of section i = start of next section, or end of track for the last
+      if (i + 1 < sections.length) return sections[i + 1].start;
+      return isFinite(audio.duration) ? audio.duration : Infinity;
+    }
+
+    function renderSections() {
+      sectionsEl.innerHTML = '';
+      sections.forEach((sec, i) => {
+        const li = document.createElement('li');
+        li.className = 'section';
+        li.dataset.index = i;
+
+        const time = document.createElement('span');
+        time.className = 'section-time';
+        time.textContent = fmt(sec.start);
+
+        const label = document.createElement('span');
+        label.className = 'section-label';
+        label.textContent = sec.label;
+
+        const loopBtn = document.createElement('button');
+        loopBtn.className = 'loop-btn';
+        loopBtn.textContent = 'loop';
+
+        // Click row (not the loop button) = seek there and play, no loop
+        li.addEventListener('click', (e) => {
+          if (e.target === loopBtn) return;
+          clearLoop();
+          audio.currentTime = sec.start;
+          audio.play();
+        });
+        loopBtn.addEventListener('click', () => toggleLoop(i));
+
+        li.appendChild(time);
+        li.appendChild(label);
+        li.appendChild(loopBtn);
+        sectionsEl.appendChild(li);
+      });
+    }
+
+    function clearLoop() {
+      loopStart = loopEnd = loopIndex = null;
+      document.querySelectorAll('.loop-btn').forEach(b => {
+        b.classList.remove('active');
+        b.textContent = 'loop';
+      });
+    }
+
+    function toggleLoop(i) {
+      const btns = document.querySelectorAll('.loop-btn');
+      if (loopIndex === i) { clearLoop(); audio.pause(); return; }
+      clearLoop();
+      loopIndex = i;
+      loopStart = sections[i].start;
+      loopEnd = sectionEnd(i);
+      btns[i].classList.add('active');
+      btns[i].textContent = 'stop';
+      audio.currentTime = loopStart;
+      audio.play();
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (audio.paused) audio.play();
+      else audio.pause();
+    });
+
+    speedInput.addEventListener('input', () => {
+      const r = parseFloat(speedInput.value);
+      audio.playbackRate = r;
+      speedDisplay.textContent = r.toFixed(2) + '×';
+    });
+
+    scrubber.addEventListener('click', (e) => {
+      if (!isFinite(audio.duration)) return;
+      const rect = scrubber.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      clearLoop();
+      audio.currentTime = ratio * audio.duration;
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      durTimeEl.textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      if (loopStart !== null && audio.currentTime >= loopEnd) {
+        audio.currentTime = loopStart;
+      }
+      curTimeEl.textContent = fmt(audio.currentTime);
+      if (isFinite(audio.duration)) {
+        scrubberFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+      }
+      // highlight the active section
+      let active = -1;
+      for (let i = 0; i < sections.length; i++) {
+        if (audio.currentTime >= sections[i].start) active = i; else break;
+      }
+      document.querySelectorAll('.section').forEach((el, i) => {
+        el.classList.toggle('active', i === active);
+      });
+    });
+
+    audio.addEventListener('play',  () => { playBtn.textContent = 'pause'; });
+    audio.addEventListener('pause', () => { playBtn.textContent = 'play'; });
+    audio.addEventListener('ended', () => { clearLoop(); });
   </script>
 </body>
 </html>
