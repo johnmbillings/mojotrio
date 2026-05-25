@@ -17,22 +17,14 @@
       gap: 1.5rem;
     }
 
-    #video-wrapper {
-      width: min(560px, 92vw);
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border: 1px solid var(--line-strong);
-    }
-    #video-wrapper iframe { width: 100%; height: 100%; border: 0; display: block; }
-
     #start-btn {
       background: transparent;
       border: 1px solid var(--line-strong);
       color: var(--ink);
       font-family: var(--font-serif);
       font-style: italic;
-      font-size: 1rem;
-      padding: 0.55rem 1.8rem;
+      font-size: 1.05rem;
+      padding: 0.55rem 1.9rem;
       cursor: pointer;
       letter-spacing: 0.06em;
       transition: color 0.3s ease, border-color 0.3s ease;
@@ -51,10 +43,10 @@
     .now-playing .current {
       display: block;
       color: var(--ember);
-      font-size: 1.05rem;
+      font-size: 1.3rem;
       letter-spacing: 0.04em;
-      font-style: italic;
       margin-top: 0.2rem;
+      text-transform: lowercase;
     }
 
     .setlist {
@@ -64,16 +56,25 @@
       width: min(420px, 92vw);
     }
     .setlist li {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
       font-family: var(--font-serif);
-      font-size: 1rem;
+      font-size: 1.1rem;
       color: var(--ink-mute);
-      padding: 0.45rem 0.6rem;
+      padding: 0.55rem 0.6rem;
       border-bottom: 1px solid var(--line);
       transition: color 0.3s ease, opacity 0.3s ease;
-      font-style: italic;
+      cursor: pointer;
+      text-transform: lowercase;
+    }
+    .setlist li .num {
+      color: var(--ink-faint);
+      font-variant-numeric: tabular-nums;
+      margin-right: 0.5rem;
     }
     .setlist li.played { color: var(--ink-faint); opacity: 0.6; }
-    .setlist li.active { color: var(--ember); font-style: normal; }
+    .setlist li.active { color: var(--ember); }
 
     .loop-badge {
       font-family: var(--font-serif);
@@ -88,55 +89,11 @@
   </style>
 </head>
 <body>
-  <svg class="smoke smoke-bg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" viewBox="0 0 100 140">
-    <defs>
-      <filter id="bg-warp" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035 0.08" numOctaves="2" seed="3" stitchTiles="stitch" result="noise">
-          <animate attributeName="seed" values="3;203" dur="90s" repeatCount="indefinite"/>
-        </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" result="displaced"/>
-        <feGaussianBlur in="displaced" stdDeviation="1.2"/>
-      </filter>
-      <radialGradient id="bg-puff" cx="50%" cy="55%" r="50%">
-      <stop offset="0%" stop-color="rgba(235,226,207,0.12)"/>
-      <stop offset="50%" stop-color="rgba(235,226,207,0.05)"/>
-      <stop offset="100%" stop-color="rgba(235,226,207,0)"/>
-      </radialGradient>
-    </defs>
-    <g filter="url(#bg-warp)">
-      <ellipse cx="8" cy="158" rx="4" ry="14" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="34s" begin="-2s" repeatCount="indefinite"/><animate attributeName="cx" values="8;11" dur="34s" begin="-2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="34s" begin="-2s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="26" cy="158" rx="5" ry="16" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="30s" begin="-12s" repeatCount="indefinite"/><animate attributeName="cx" values="26;24" dur="30s" begin="-12s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="30s" begin="-12s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="48" cy="158" rx="4" ry="13" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="38s" begin="-22s" repeatCount="indefinite"/><animate attributeName="cx" values="48;52" dur="38s" begin="-22s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="38s" begin="-22s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="68" cy="158" rx="5" ry="15" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="32s" begin="-8s" repeatCount="indefinite"/><animate attributeName="cx" values="68;65" dur="32s" begin="-8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="32s" begin="-8s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="90" cy="158" rx="4" ry="14" fill="url(#bg-puff)" opacity="0"><animate attributeName="cy" values="158;-102" dur="36s" begin="-26s" repeatCount="indefinite"/><animate attributeName="cx" values="90;92" dur="36s" begin="-26s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="36s" begin="-26s" repeatCount="indefinite"/></ellipse>
-    </g>
-  </svg>
-  <svg class="smoke smoke-fg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" viewBox="0 0 100 140">
-    <defs>
-      <filter id="fg-warp" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.025 0.06" numOctaves="2" seed="7" stitchTiles="stitch" result="noise">
-          <animate attributeName="seed" values="7;207" dur="70s" repeatCount="indefinite"/>
-        </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" result="displaced"/>
-        <feGaussianBlur in="displaced" stdDeviation="1.5"/>
-      </filter>
-      <radialGradient id="fg-puff" cx="50%" cy="55%" r="50%">
-      <stop offset="0%" stop-color="rgba(235,226,207,0.15)"/>
-      <stop offset="50%" stop-color="rgba(235,226,207,0.06)"/>
-      <stop offset="100%" stop-color="rgba(235,226,207,0)"/>
-      </radialGradient>
-    </defs>
-    <g filter="url(#fg-warp)">
-      <ellipse cx="18" cy="160" rx="7" ry="20" fill="url(#fg-puff)" opacity="0"><animate attributeName="cy" values="160;-100" dur="26s" begin="-10s" repeatCount="indefinite"/><animate attributeName="cx" values="18;22" dur="26s" begin="-10s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="26s" begin="-10s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="54" cy="160" rx="8" ry="22" fill="url(#fg-puff)" opacity="0"><animate attributeName="cy" values="160;-100" dur="22s" begin="-18s" repeatCount="indefinite"/><animate attributeName="cx" values="54;50" dur="22s" begin="-18s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="22s" begin="-18s" repeatCount="indefinite"/></ellipse>
-      <ellipse cx="82" cy="160" rx="6" ry="18" fill="url(#fg-puff)" opacity="0"><animate attributeName="cy" values="160;-100" dur="28s" begin="-2s" repeatCount="indefinite"/><animate attributeName="cx" values="82;85" dur="28s" begin="-2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.85;0.45;0" keyTimes="0;0.18;0.8;1" dur="28s" begin="-2s" repeatCount="indefinite"/></ellipse>
-    </g>
-  </svg>
-<a class="back" href="index.html">← back</a>
+  <a class="back" href="index.html">← back</a>
 
   <div class="page-header">
     <h1>virtual concert</h1>
-    <p class="subtitle">full set, on loop</p>
+    <p class="subtitle">the full set, on loop</p>
     <div class="marks-row" aria-hidden="true">
       <img class="m-spirit" src="feather.svg" alt="">
       <img class="m-frog"   src="frog.svg"    alt="">
@@ -144,9 +101,7 @@
     </div>
   </div>
 
-  <div id="video-wrapper">
-    <div id="player"></div>
-  </div>
+  <audio id="audio" preload="none"></audio>
 
   <button id="start-btn">start concert</button>
 
@@ -159,35 +114,17 @@
 
   <p class="loop-badge" id="loop-badge"></p>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    let player;
-    let playerReady = false;
-    let playlist = [];
-    let currentIndex = 0;
-    let loopCount = 0;
-    let started = false;
-    let currentEndTime = null;
-    let endCheckInterval = null;
-
+    const audio = document.getElementById('audio');
     const currentTitle = document.getElementById('current-title');
     const setlistEl = document.getElementById('setlist');
     const loopBadge = document.getElementById('loop-badge');
     const startBtn = document.getElementById('start-btn');
 
-    function parseTime(t) {
-      const parts = t.split(':');
-      if (parts.length === 1) return parseFloat(parts[0]) || 0;
-      if (parts.length === 3) return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
-      return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
-    }
-
-    function getSongBounds(song) {
-      return {
-        start: song.concertStart ? parseTime(song.concertStart) : 0,
-        end: song.concertEnd ? parseTime(song.concertEnd) : null
-      };
-    }
+    let playlist = [];
+    let currentIndex = 0;
+    let loopCount = 0;
+    let started = false;
 
     fetch('songs.json')
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -205,42 +142,22 @@
 
         playlist.forEach((song, i) => {
           const li = document.createElement('li');
-          const parts = song.title.split(' — ');
-          li.textContent = parts.length === 2 ? parts[1] : song.title;
           li.id = 'setlist-' + i;
+          const num = document.createElement('span');
+          num.className = 'num';
+          num.textContent = (i + 1).toString().padStart(2, '0');
+          const name = document.createElement('span');
+          name.style.flex = '1';
+          name.textContent = song.title;
+          li.appendChild(num);
+          li.appendChild(name);
+          li.addEventListener('click', () => { if (started) playSong(i); });
           setlistEl.appendChild(li);
         });
 
         currentTitle.textContent = 'ready';
-        initPlayer();
       })
       .catch(() => { currentTitle.textContent = 'failed to load'; });
-
-    function initPlayer() {
-      const firstBounds = getSongBounds(playlist[0]);
-      window.onYouTubeIframeAPIReady = function () {
-        player = new YT.Player('player', {
-          width: '100%', height: '100%',
-          videoId: playlist[0].videoId,
-          playerVars: {
-            origin: window.location.origin,
-            rel: 0, controls: 1, playsinline: 1,
-            start: Math.floor(firstBounds.start)
-          },
-          events: {
-            onReady: () => { playerReady = true; },
-            onStateChange: (event) => {
-              if (event.data === YT.PlayerState.ENDED && started) playNext();
-            },
-            onError: (event) => {
-              currentTitle.textContent = 'video error (' + event.data + ')';
-              console.error('YouTube error:', event.data);
-            }
-          }
-        });
-      };
-      if (window.YT && window.YT.Player) window.onYouTubeIframeAPIReady();
-    }
 
     function updateSetlist() {
       playlist.forEach((_, i) => {
@@ -251,20 +168,13 @@
       });
     }
 
-    function playSong(index, isFirstPlay) {
+    function playSong(index) {
       currentIndex = index;
-      const song = playlist[currentIndex];
-      const bounds = getSongBounds(song);
-      currentEndTime = bounds.end;
-      const parts = song.title.split(' — ');
-      currentTitle.textContent = parts.length === 2 ? parts[1] : song.title;
+      const song = playlist[index];
+      currentTitle.textContent = song.title;
       updateSetlist();
-      if (isFirstPlay) {
-        player.seekTo(bounds.start, true);
-        player.playVideo();
-      } else {
-        player.loadVideoById({ videoId: song.videoId, startSeconds: bounds.start });
-      }
+      audio.src = song.audio;
+      audio.play();
     }
 
     function playNext() {
@@ -274,28 +184,23 @@
         loopCount++;
         loopBadge.textContent = 'loop ' + (loopCount + 1);
       }
-      playSong(currentIndex, false);
+      playSong(currentIndex);
     }
 
-    function checkEnd() {
-      if (!started || currentEndTime === null) return;
-      try { if (player.getCurrentTime() >= currentEndTime) playNext(); } catch (e) {}
-    }
+    audio.addEventListener('ended', () => { if (started) playNext(); });
 
     startBtn.addEventListener('click', () => {
-      if (!playerReady || playlist.length === 0) return;
+      if (playlist.length === 0) return;
       if (!started) {
         started = true;
         loopCount = 0;
         loopBadge.textContent = 'loop 1';
         startBtn.textContent = 'restart';
-        playSong(0, true);
-        if (!endCheckInterval) endCheckInterval = setInterval(checkEnd, 500);
+        playSong(0);
       } else {
-        currentIndex = 0;
         loopCount = 0;
         loopBadge.textContent = 'loop 1';
-        playSong(0, false);
+        playSong(0);
       }
     });
   </script>
